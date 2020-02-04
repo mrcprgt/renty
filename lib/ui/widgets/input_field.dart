@@ -7,6 +7,7 @@ import 'note_text.dart';
 
 class InputField extends StatefulWidget {
   final TextEditingController controller;
+  final InputDecoration decoration;
   final TextInputType textInputType;
   final bool password;
   final bool isReadOnly;
@@ -24,6 +25,7 @@ class InputField extends StatefulWidget {
   InputField(
       {@required this.controller,
       @required this.placeholder,
+      this.decoration,
       this.enterPressed,
       this.fieldFocusNode,
       this.nextFocusNode,
@@ -86,10 +88,7 @@ class _InputFieldState extends State<InputField> {
                   },
                   obscureText: isPassword,
                   readOnly: widget.isReadOnly,
-                  decoration: InputDecoration.collapsed(
-                      hintText: widget.placeholder,
-                      hintStyle:
-                          TextStyle(fontSize: widget.smallVersion ? 12 : 15)),
+                  decoration: widget.decoration,
                 ),
               ),
               GestureDetector(

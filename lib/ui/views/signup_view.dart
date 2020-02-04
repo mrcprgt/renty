@@ -8,6 +8,10 @@ import 'package:renty_crud_version/viewmodels/signup_view_model.dart';
 class SignUpView extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final contactNumberController = TextEditingController();
+  final addressController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +21,7 @@ class SignUpView extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 50.0),
           child: Column(
+            // scrollDirection: Axis.horizontal,
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,11 +36,19 @@ class SignUpView extends StatelessWidget {
               // TODO: Add additional user data here to save (episode 2)
               InputField(
                 placeholder: 'Email',
+                decoration: new InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person)),
                 controller: emailController,
               ),
               verticalSpaceSmall,
               InputField(
                 placeholder: 'Password',
+                decoration: new InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person)),
                 password: true,
                 controller: passwordController,
                 additionalNote: 'Password has to be a minimum of 6 characters.',

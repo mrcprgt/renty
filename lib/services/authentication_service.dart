@@ -22,4 +22,18 @@ class AuthenticationService {
       return e.message;
     }
   }
+
+  Future<bool> isUserLoggedIn() async{
+    var user = await _firebaseAuth.currentUser();
+    return user!=null;
+  }
+
+  Future signOut() async {
+    try {
+      return await _firebaseAuth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
 }
