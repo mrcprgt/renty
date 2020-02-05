@@ -25,13 +25,14 @@ class LoginView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(
-                    height: 150,
+                    height: 300,
                     child:
                         Image.asset('assets/images/logo.png', fit: BoxFit.fill),
                   ),
                   InputField(
                     placeholder: 'Email',
                     controller: emailController,
+                    password: false,
                   ),
                   verticalSpaceSmall,
                   InputField(

@@ -1,7 +1,6 @@
 class User {
   final String id;
-  final String firstName;
-  final String lastName;
+  final String fullName;
   final String email;
   final int contactNumber;
   final String address;
@@ -11,8 +10,7 @@ class User {
 
   User(
       {this.id,
-      this.firstName,
-      this.lastName,
+      this.fullName,
       this.email,
       this.contactNumber,
       this.address,
@@ -21,8 +19,7 @@ class User {
 
   User.fromData(Map<String, dynamic> data)
       : id = data['id'],
-        firstName = data['firstName'],
-        lastName = data['lastName'],
+        fullName = data['fullName'],
         email = data['email'],
         contactNumber = data['contactNumber'],
         address = data['address'],
@@ -32,8 +29,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'firstName': firstName,
-      'lastName': lastName,
+      'fullName' : fullName,
       'email': email,
       'contactNumber': contactNumber,
       'address': address,

@@ -1,39 +1,69 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:renty_crud_version/models/user.dart';
+
+import '../locator.dart';
+import 'firestore_service.dart';
+
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirestoreService _firestoreService = locator<FirestoreService>();
 
-  Future loginWithEmail(
-      {@required String email, @required String password}) async {
+  User _currentUser;
+  User get currentUser => _currentUser;
+
+  Future loginWithEmail({
+    @required String email,
+    @required String password,
+  }) async {
     try {
-      var user = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-      return user !=null;
-    } catch (e) {
-      return e.message;
-    }
-  }
-
-  Future signUpWithEmail({@required String email, @required String password}) async {
-    try{
-      var authResult = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      var authResult = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await _populateCurrentUser(authResult.user);
       return authResult.user != null;
-    }catch(e){
+    } catch (e) {
       return e.message;
     }
   }
 
-  Future<bool> isUserLoggedIn() async{
-    var user = await _firebaseAuth.currentUser();
-    return user!=null;
+  Future signUpWithEmail({
+    @required String email,
+    @required String password,
+    @required String fullName,
+  }) async {
+    try {
+      var authResult = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // create a new user profile on firestore
+      _currentUser = User(
+        id: authResult.user.uid,
+        email: email,
+        fullName: fullName,
+      );
+
+      await _firestoreService.createUser(_currentUser);
+
+      return authResult.user != null;
+    } catch (e) {
+      return e.message;
+    }
   }
 
-  Future signOut() async {
-    try {
-      return await _firebaseAuth.signOut();
-    } catch (e) {
-      print(e.toString());
-      return null;
+  Future<bool> isUserLoggedIn() async {
+    var user = await _firebaseAuth.currentUser();
+    await _populateCurrentUser(user);
+    return user != null;
+  }
+
+  Future _populateCurrentUser(FirebaseUser user) async {
+    if (user != null) {
+      _currentUser = await _firestoreService.getUser(user.uid);
     }
   }
 }

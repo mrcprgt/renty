@@ -6,14 +6,15 @@ import 'package:renty_crud_version/services/navigation_service.dart';
 
 import '../locator.dart';
 import 'base_model.dart';
+
 class LoginViewModel extends BaseModel {
   final AuthenticationService _authenticationService =
       locator<AuthenticationService>();
   final DialogService _dialogService = locator<DialogService>();
   final NavigationService _navigationService = locator<NavigationService>();
 
-
-   Future logInWithEmail(@required String email, @required String password) async {
+  Future logInWithEmail(
+      @required String email, @required String password) async {
     setBusy(true);
 
     var result = await _authenticationService.loginWithEmail(

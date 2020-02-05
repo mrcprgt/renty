@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_auth: ^0.15.4
+
   floating_search_bar: ^0.3.0
   fancy_bottom_navigation: ^0.3.2
   logger: ^0.6.0
@@ -37,7 +37,10 @@ dependencies:
   # provider architecture
   provider_architecture: ^1.0.3
   #firebase auth
-  
+  cloud_firestore: ^0.13.0+1
+  firebase_auth: ^0.15.4
+  firebase_core: ^0.4.3+3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

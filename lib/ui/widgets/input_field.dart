@@ -45,16 +45,32 @@ class InputField extends StatefulWidget {
 
 class _InputFieldState extends State<InputField> {
   bool isPassword;
+  bool showPassword;
   double fieldHeight = 55;
 
   @override
   void initState() {
     super.initState();
+    showPassword = false;
     isPassword = widget.password;
+    if(isPassword){
+      showPassword = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    var inputDecoration = InputDecoration(
+        labelText: widget.placeholder,
+        focusColor: Colors.pinkAccent,
+        border: OutlineInputBorder(),
+        prefixIcon: widget.placeholder.toString() == 'Email'
+            ? Icon(Icons.email)
+            : widget.placeholder.toString() == 'Password'
+                ? Icon(Icons.lock)
+                : widget.placeholder.toString() == 'Full Name'
+                    ? Icon(Icons.person)
+                    : Icon(Icons.cake));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -62,8 +78,8 @@ class _InputFieldState extends State<InputField> {
           height: widget.smallVersion ? 40 : fieldHeight,
           alignment: Alignment.centerLeft,
           padding: fieldPadding,
-          decoration:
-              widget.isReadOnly ? disabledFieldDecortaion : fieldDecortaion,
+          // decoration:
+          //     widget.isReadOnly ? disabledFieldDecortaion : fieldDecortaion,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -86,24 +102,23 @@ class _InputFieldState extends State<InputField> {
                       widget.nextFocusNode.requestFocus();
                     }
                   },
-                  obscureText: isPassword,
+                  obscureText: showPassword,
                   readOnly: widget.isReadOnly,
-                  decoration: widget.decoration,
+                  decoration: isPassword
+                      ? InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock),
+                          suffixIcon: GestureDetector(
+                              onTap: () => setState(() {
+                                    showPassword = !showPassword;
+                                  }),
+                              child: Icon(showPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off)))
+                      : inputDecoration,
+                  // decoration: widget.decoration,
                 ),
-              ),
-              GestureDetector(
-                onTap: () => setState(() {
-                  isPassword = !isPassword;
-                }),
-                child: widget.password
-                    ? Container(
-                        width: fieldHeight,
-                        height: fieldHeight,
-                        alignment: Alignment.center,
-                        child: Icon(isPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off))
-                    : Container(),
               ),
             ],
           ),
