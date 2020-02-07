@@ -1,6 +1,6 @@
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
-import 'package:floating_search_bar/floating_search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/ui/widgets/item_listing_tile.dart';
 
@@ -16,102 +16,140 @@ class HomeView extends StatelessWidget {
       onModelReady: (model) => model.listenToItemListings(),
       builder: (context, model, child) => Scaffold(
         body: model.items != null
-            ? FloatingSearchBar.builder(
-                pinned: true,
-                itemCount: model.items.length,
-                itemBuilder: (context, index) => GestureDetector(
-                  //onTap: () => model.editPost(index),
-                  child: ItemTile(
-                    item: model.items[index],
-                  ),
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    _buildAppBar(context),
+                    _buildSliverHeader(),
+                    _buildCategoriesBar(),
+                    _buildGridView(context, model),
+                  ],
                 ),
-                trailing: CircleAvatar(
-                  //TODO: Insert current user avatar.
-                  // child: Text("MP"),
-                  child: Icon(Icons.face),
-                ),
-                drawer: _buildDrawer(),
               )
-            //* if no model, show loading
             : Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation(Colors.pink),
                 ),
               ),
-        bottomNavigationBar: _buildBottomNavBar(),
+        //bottomNavigationBar: _buildBottomNavBar(),
       ),
     );
   }
 
-  Widget _buildDrawer() {
-    return Drawer(
-        elevation: 20,
-        child: Column(children: <Widget>[
-          DrawerHeader(
-              child: Container(
-                child: ListView(
-                  children: <Widget>[
-                    Text('Welcome to Renty~'),
-                    Icon(Icons.face),
-                    Text('You are not verified yet.')
-                  ],
-                ),
-              ),
-              decoration: BoxDecoration(
-                color: Colors.pinkAccent,
-              )),
-          Expanded(
-              child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              ListTile(
-                title: Text('Transaction History'),
-                leading: Icon(Icons.history),
-                onTap: () {},
-              ),
-              ListTile(
-                title: Text('Help'),
-                leading: Icon(Icons.help),
-                onTap: () {},
-              ),
-              ListTile(
-                  title: Text('Logout'),
-                  leading: Icon(Icons.exit_to_app),
-                  onTap: () {})
-            ],
-          )),
-          Container(
-            color: Colors.black,
-            width: double.infinity,
-            height: 0.1,
-          ),
-          Container(
-              padding: EdgeInsets.all(10),
-              height: 100,
-              child: Text(
-                "V1.0.0",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )),
-        ]));
-  }
-
-  Widget _buildBottomNavBar() {
-    return FancyBottomNavigation(
-      circleColor: Colors.pink,
-      activeIconColor: Colors.white,
-      inactiveIconColor: Colors.black,
-      tabs: [
-        TabData(iconData: Icons.home, title: "Home"),
-        TabData(iconData: Icons.pan_tool, title: "Lend my Item"),
-        TabData(iconData: Icons.receipt, title: "My Rented Items")
-      ],
-      onTabChangedListener: (position) {
-        setState(() {
-          //currentPage = position;
-        });
-      },
+  Widget _buildSliverHeader() {
+    return SliverToBoxAdapter(
+      child: Container(
+        child: Text(
+          'Good Morning, User',
+          textScaleFactor: 2.5,
+        ),
+      ),
     );
   }
 
-  void setState(Null Function() param0) {}
+  Widget _buildCategoriesBar() {
+    return SliverToBoxAdapter(
+        child: Container(
+      height: 60.0,
+      //TODO: CHANGE THIS TO STREAM CATEGORIES
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              //crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                ClipOval(
+                  child: Material(
+                    color: Colors.blue, // button color
+                    child: InkWell(
+                      splashColor: Colors.red, // inkwell color
+                      // child: SizedBox(
+                      //     width: 50, height: 10, child: Icon(Icons.menu)),
+                      child: Icon(Icons.menu),
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Container(
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          'Category',
+                          textScaleFactor: 0.75,
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ));
+  }
+
+  Widget _buildAppBar(BuildContext context) {
+    return SliverAppBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      elevation: 5.0,
+      automaticallyImplyLeading: false,
+      pinned: true,
+      floating: false,
+      title: new TextField(
+        //focusNode: _searchFocusNode,
+        //style: Theme.of(context).primaryTextTheme.title,
+        decoration: InputDecoration(
+          // border: OutlineInputBorder(
+          //     borderRadius:
+          //         BorderRadius.all(Radius.circular(1.0))),
+          suffixIcon: Icon(Icons.search),
+          hintText: 'What do you want to borrow?',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridView(BuildContext context, HomeViewModel model) {
+    return new SliverStaggeredGrid.countBuilder(
+      crossAxisCount: 4,
+      itemCount: model.items.length,
+      itemBuilder: ((BuildContext context, index) => GestureDetector(
+            //onTap:
+            child: ItemTile(
+              item: model.items[index],
+            ),
+          )),
+      staggeredTileBuilder: (int index) =>
+          new StaggeredTile.count(2, index.isEven ? 2 : 1),
+      mainAxisSpacing: 4.0,
+      crossAxisSpacing: 4.0,
+    );
+  }
+
+  // new SliverGrid(
+  //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+  //     maxCrossAxisExtent: 400.0,
+  //     mainAxisSpacing: 5.0,
+  //     crossAxisSpacing: 5.0,
+  //     childAspectRatio: 0.6,
+  //   ),
+  //   delegate: SliverChildBuilderDelegate(
+  //       (BuildContext context, index) => GestureDetector(
+  //             //onTap:
+  //             child: ItemTile(
+  //               item: model.items[index],
+  //             ),
+  //           ),
+  //       childCount: model.items.length),
+  // )
 }

@@ -5,9 +5,10 @@ class Item {
   final String rentType;
   var rentRate;
 
-  bool isApproved;
-  bool isRented;
+  // bool isApproved;
+  // bool isRented;
 
+  var itemThumbnail;
   String acquisitionType;
 
   DateTime acquisitionTime;
@@ -18,8 +19,9 @@ class Item {
       this.description,
       this.rentType,
       this.rentRate,
-      this.isApproved,
-      this.isRented,
+      this.itemThumbnail,
+      // this.isApproved,
+      // this.isRented,
       this.acquisitionType,
       this.acquisitionTime});
 
@@ -30,8 +32,9 @@ class Item {
       'description': description,
       'rent_type': rentType,
       'rent_rate': rentRate,
-      'is_approved': isApproved,
-      'is_rented': isRented,
+      'item_thumb': itemThumbnail,
+      // 'is_approved': isApproved,
+      // 'is_rented': isRented,
       'acquisition_type': acquisitionType,
       'acquisition_time': acquisitionTime,
     };
@@ -46,8 +49,9 @@ class Item {
       description: map['description'],
       rentType: map['rent_type'],
       rentRate: map['rent_rate'],
-      isApproved: map['is_approved'],
-      isRented: map['is_rented'],
+      itemThumbnail: map['item_thumb'],
+      // isApproved: map['is_approved'],
+      // isRented: map['is_rented'],
       acquisitionType: map['acquisition_type'],
       acquisitionTime: map['acquisiton_time'],
     );

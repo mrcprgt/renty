@@ -10,6 +10,7 @@ import '../locator.dart';
 import 'base_model.dart';
 
 class HomeViewModel extends BaseModel {
+  final AuthenticationService _authenticationService = locator<AuthenticationService>();
   //final NavigationService _navigationService = locator<NavigationService>();
   final FirestoreService _firestoreService = locator<FirestoreService>();
   //final DialogService _dialogService = locator<DialogService>();
@@ -32,4 +33,12 @@ class HomeViewModel extends BaseModel {
       setBusy(false);
     });
   }
+
+  // String getFirstName(){
+  //   setBusy(true);
+
+  //   var currentUser =  _authenticationService.getUserDetails();
+  //   String firstName = ;
+
+  // }
 }

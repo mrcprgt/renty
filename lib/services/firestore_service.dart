@@ -19,6 +19,7 @@ class FirestoreService {
     try {
       await _usersCollectionReference.document(user.id).setData(user.toJson());
     } catch (e) {
+      if(e is PlatformException)
       return e.message;
     }
   }

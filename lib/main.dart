@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:renty_crud_version/services/navigation_service.dart';
 import 'package:renty_crud_version/services/dialog_service.dart';
 import 'package:renty_crud_version/ui/views/startup_view.dart';
@@ -16,6 +17,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Logger.level = Level.verbose;
     return MaterialApp(
       title: 'Renty',
       builder: (context, child) => Navigator(

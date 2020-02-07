@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:renty_crud_version/models/user.dart';
-
-import '../locator.dart';
+import 'package:renty_crud_version/locator.dart';
 import 'firestore_service.dart';
 
 class AuthenticationService {
@@ -51,7 +50,8 @@ class AuthenticationService {
 
       return authResult.user != null;
     } catch (e) {
-      return e.message;
+      //return e.message;
+      return e.toString();
     }
   }
 
@@ -66,4 +66,8 @@ class AuthenticationService {
       _currentUser = await _firestoreService.getUser(user.uid);
     }
   }
+
+  // Future<User> getUserDetails() async {
+  //   return currentUser;
+  // }
 }
