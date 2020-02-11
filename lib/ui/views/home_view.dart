@@ -1,4 +1,3 @@
-import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
@@ -7,32 +6,42 @@ import 'package:renty_crud_version/ui/widgets/item_listing_tile.dart';
 import 'package:renty_crud_version/viewmodels/home_view_model.dart';
 
 class HomeView extends StatelessWidget {
-  const HomeView({Key key}) : super(key: key);
+  const HomeView({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ViewModelProvider<HomeViewModel>.withConsumer(
       viewModel: HomeViewModel(),
       onModelReady: (model) => model.listenToItemListings(),
-      builder: (context, model, child) => Scaffold(
-        body: model.items != null
-            ? Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    _buildAppBar(context),
-                    _buildSliverHeader(),
-                    _buildCategoriesBar(),
-                    _buildGridView(context, model),
-                  ],
-                ),
-              )
-            : Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Colors.pink),
-                ),
-              ),
-        //bottomNavigationBar: _buildBottomNavBar(),
+      builder: (context, model, child) => WillPopScope(
+        onWillPop: () => onWillPop(),
+        child: SafeArea(
+          child: Scaffold(
+            body: model.items != null
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CustomScrollView(
+                      slivers: <Widget>[
+                        _buildAppBar(context),
+                        _buildSliverHeader(),
+                        _buildCategoriesBar(),
+                        _buildGridView(context, model),
+                      ],
+                    ),
+                  )
+                : Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.pink),
+                    ),
+                  ),
+            floatingActionButton: FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => model.goToItemLendPage(),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -103,8 +112,8 @@ class HomeView extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 5.0,
       automaticallyImplyLeading: false,
-      pinned: true,
-      floating: false,
+      pinned: false,
+      floating: true,
       title: new TextField(
         //focusNode: _searchFocusNode,
         //style: Theme.of(context).primaryTextTheme.title,
@@ -124,9 +133,10 @@ class HomeView extends StatelessWidget {
       crossAxisCount: 4,
       itemCount: model.items.length,
       itemBuilder: ((BuildContext context, index) => GestureDetector(
-            //onTap:
+            onTap: () => model.goToItemDetailPage(model.items[index]),
             child: ItemTile(
               item: model.items[index],
+              onPressed: () => model.goToItemDetailPage(model.items[index]),
             ),
           )),
       staggeredTileBuilder: (int index) =>
@@ -136,20 +146,16 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  // new SliverGrid(
-  //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-  //     maxCrossAxisExtent: 400.0,
-  //     mainAxisSpacing: 5.0,
-  //     crossAxisSpacing: 5.0,
-  //     childAspectRatio: 0.6,
-  //   ),
-  //   delegate: SliverChildBuilderDelegate(
-  //       (BuildContext context, index) => GestureDetector(
-  //             //onTap:
-  //             child: ItemTile(
-  //               item: model.items[index],
-  //             ),
-  //           ),
-  //       childCount: model.items.length),
-  // )
+  //TODO : Double tap back to exit.
+  Future<bool> onWillPop() {
+    DateTime currentBackPressTime;
+    DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      // Fluttertoast.showToast(msg: exit_warning);
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
 }

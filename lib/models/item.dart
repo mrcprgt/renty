@@ -3,12 +3,11 @@ class Item {
   final String itemName;
   final String description;
   final String rentType;
+  var itemImages;
   var rentRate;
 
   // bool isApproved;
   // bool isRented;
-
-  var itemThumbnail;
   String acquisitionType;
 
   DateTime acquisitionTime;
@@ -19,7 +18,7 @@ class Item {
       this.description,
       this.rentType,
       this.rentRate,
-      this.itemThumbnail,
+      this.itemImages,
       // this.isApproved,
       // this.isRented,
       this.acquisitionType,
@@ -32,7 +31,7 @@ class Item {
       'description': description,
       'rent_type': rentType,
       'rent_rate': rentRate,
-      'item_thumb': itemThumbnail,
+      'item_images': itemImages,
       // 'is_approved': isApproved,
       // 'is_rented': isRented,
       'acquisition_type': acquisitionType,
@@ -49,7 +48,7 @@ class Item {
       description: map['description'],
       rentType: map['rent_type'],
       rentRate: map['rent_rate'],
-      itemThumbnail: map['item_thumb'],
+      itemImages: map['item_images'],
       // isApproved: map['is_approved'],
       // isRented: map['is_rented'],
       acquisitionType: map['acquisition_type'],

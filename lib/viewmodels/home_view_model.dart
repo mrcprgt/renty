@@ -1,17 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:renty_crud_version/constants/route_names.dart';
 import 'package:renty_crud_version/models/item.dart';
 
 import 'package:renty_crud_version/services/authentication_service.dart';
 import 'package:renty_crud_version/services/dialog_service.dart';
 import 'package:renty_crud_version/services/firestore_service.dart';
 import 'package:renty_crud_version/services/navigation_service.dart';
+import 'package:renty_crud_version/ui/views/item_details_view.dart';
 
 import '../locator.dart';
 import 'base_model.dart';
 
 class HomeViewModel extends BaseModel {
-  final AuthenticationService _authenticationService = locator<AuthenticationService>();
-  //final NavigationService _navigationService = locator<NavigationService>();
+  final AuthenticationService _authenticationService =
+      locator<AuthenticationService>();
+  final NavigationService _navigationService = locator<NavigationService>();
   final FirestoreService _firestoreService = locator<FirestoreService>();
   //final DialogService _dialogService = locator<DialogService>();
 
@@ -26,12 +29,21 @@ class HomeViewModel extends BaseModel {
       if (updatedItemListing != null && updatedItemListing.length > 0) {
         _items = updatedItemListing;
         notifyListeners();
-      }else{
+      } else {
         print('No stream received');
       }
 
       setBusy(false);
     });
+  }
+
+  void goToItemDetailPage(Item item) {
+    print(item.itemName + ' is being routed ...');
+    _navigationService.navigateTo(ItemDetailViewRoute, arguments: item);
+  }
+
+  void goToItemLendPage() {
+    _navigationService.navigateTo(ItemLendViewRoute);
   }
 
   // String getFirstName(){

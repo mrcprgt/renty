@@ -1,363 +1,145 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:provider_architecture/viewmodel_provider.dart';
+import 'package:renty_crud_version/models/item.dart';
+import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view.dart';
 
-class ItemDetailView extends StatefulWidget {
-  @override
-  _ItemDetailViewState createState() => _ItemDetailViewState();
-}
+import 'package:photo_view/photo_view_gallery.dart';
 
-class _ItemDetailViewState extends State<ItemDetailView>
-    with TickerProviderStateMixin {
+class ItemDetailView extends StatelessWidget {
+  const ItemDetailView(
+      {Key key, this.receivedItem, this.photo, this.heroAttributes})
+      : super(key: key);
+  final Item receivedItem;
+  final PhotoViewHeroAttributes heroAttributes;
+  final String photo;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left,
-            size: 40.0,
-            color: Colors.black,
+    return ViewModelProvider<ItemDetailViewModel>.withConsumer(
+      viewModel: ItemDetailViewModel(),
+      //onModelReady: (model) => model.listenToItemListings(),
+      builder: (context, model, child) => SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.pinkAccent,
+            title: Text('Item Details'),
+            centerTitle: true,
+            //toolbarOpacity: 2.0,
           ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        backgroundColor: Colors.white,
-        title: Text(
-          //! PRODUCT NAME DAPAT
-          "Product Details",
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-      ),
-      body: _buildProductDetailsPage(context),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  _buildProductDetailsPage(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
-
-    return ListView(
-      children: <Widget>[
-        Container(
-          padding: const EdgeInsets.all(4.0),
-          child: Card(
-            elevation: 4.0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildProductImagesWidgets(),
-                _buildProductTitleWidget(),
-                SizedBox(height: 12.0),
-                _buildPriceWidgets(),
-                SizedBox(height: 12.0),
-                _buildDivider(screenSize),
-                SizedBox(height: 12.0),
-                _buildFurtherInfoWidget(),
-                SizedBox(height: 12.0),
-                _buildDivider(screenSize),
-                SizedBox(height: 12.0),
-                // _buildSizeChartWidgets(),
-                // SizedBox(height: 12.0),
-                _buildDetailsAndMaterialWidgets(),
-                SizedBox(height: 12.0),
-                // _buildStyleNoteHeader(),
-                // SizedBox(height: 6.0),
-                // _buildDivider(screenSize),
-                // SizedBox(height: 4.0),
-                // _buildStyleNoteData(),
-                // SizedBox(height: 20.0),
-                _buildMoreInfoHeader(),
-                SizedBox(height: 6.0),
-                _buildDivider(screenSize),
-                SizedBox(height: 4.0),
-                _buildMoreInfoData(),
-                SizedBox(height: 24.0),
-              ],
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(children: <Widget>[
+                _buildImages(receivedItem),
+                _buildProductCard(receivedItem),
+                _buildDescriptionPanel(receivedItem),
+                _buildReviewsPanel(receivedItem),
+              ]),
             ),
           ),
+          bottomNavigationBar: _buildBottomNavigationBar(context),
         ),
-      ],
+      ),
     );
   }
 
-  _buildDivider(Size screenSize) {
-    return Column(
-      children: <Widget>[
-        Container(
-          color: Colors.grey[600],
-          width: screenSize.width,
-          height: 0.25,
-        ),
-      ],
-    );
-  }
-
-  _buildProductImagesWidgets() {
-    TabController imagesController = TabController(length: 3, vsync: this);
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+  Widget _buildProductCard(Item item) {
+    return Align(
+      alignment: Alignment.topLeft,
       child: Container(
-        height: 250.0,
-        child: Center(
-          child: DefaultTabController(
-            length: 3,
-            child: Stack(
-              children: <Widget>[
-                TabBarView(
-                  controller: imagesController,
-                  children: <Widget>[
-                    Image.network(
-                      "https://www.ikea.com/us/en/images/products/stefan-chair-brown-black__0727320_PE735593_S5.JPG?f=s",
-                    ),
-                    Image.network(
-                      "https://secure.img1-fg.wfcdn.com/im/64091119/resize-h600-w600%5Ecompr-r85/9988/99885278/Accent+Chairs.jpg",
-                    ),
-                    Image.network(
-                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt7LzJ4DQcJnGKSkmmlSEpibxfYZT7CgwFCbwmdw_D6LIQ9tlm&s",
-                    ),
-                  ],
-                ),
-                Container(
-                  alignment: FractionalOffset(0.5, 0.95),
-                  child: TabPageSelector(
-                    controller: imagesController,
-                    selectedColor: Colors.grey,
-                    color: Colors.white,
-                  ),
-                )
-              ],
-            ),
+          padding: EdgeInsets.all(5),
+          decoration: new BoxDecoration(
+            border: new BorderDirectional(
+                start: new BorderSide(color: Colors.pink, width: 5)),
           ),
-        ),
-      ),
-    );
-  }
-
-  _buildProductTitleWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Center(
-        child: Text(
-          //name,
-          "IKEA CHAIR",
-          style: TextStyle(fontSize: 16.0, color: Colors.black),
-        ),
-      ),
-    );
-  }
-
-  _buildPriceWidgets() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Text(
-            "\$899/day",
-            style: TextStyle(fontSize: 16.0, color: Colors.black),
-          ),
-          SizedBox(
-            width: 8.0,
-          ),
-          Text(
-            // "\$1299",
-            "",
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.grey,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-          SizedBox(
-            width: 8.0,
-          ),
-          Text(
-            "30% Off",
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.blue[700],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  _buildFurtherInfoWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.local_offer,
-            color: Colors.grey[500],
-          ),
-          SizedBox(
-            width: 12.0,
-          ),
-          Text(
-            "Tap to get further info",
-            style: TextStyle(
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  _buildSizeChartWidgets() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(
-                Icons.straighten,
-                color: Colors.grey[600],
-              ),
-              SizedBox(
-                width: 12.0,
-              ),
+              Text(item.itemName,
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24)),
               Text(
-                "Size",
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
-              ),
+                item.rentRate.toString() + ' / ' + item.rentType.toString(),
+                style: TextStyle(fontWeight: FontWeight.w400),
+              )
             ],
-          ),
-          Text(
-            "SIZE CHART",
-            style: TextStyle(
-              color: Colors.blue[400],
-              fontSize: 12.0,
-            ),
-          ),
-        ],
-      ),
+          )),
     );
   }
 
-  _buildDetailsAndMaterialWidgets() {
-    TabController tabController = new TabController(length: 2, vsync: this);
+  Widget _buildDescriptionPanel(Item item) {
     return Container(
+      alignment: Alignment.topLeft,
+      padding: EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TabBar(
-            controller: tabController,
-            tabs: <Widget>[
-              Tab(
-                child: Text(
-                  "DETAILS",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "REVIEWS",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            height: 40.0,
-            child: TabBarView(
-              controller: tabController,
-              children: <Widget>[
-                Text(
-                  "2020 MODEL OF DOG CHAIR",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  "5 STAR VERY SOLID PRODUCT WILL RENT AGAIN",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                )
-              ],
-            ),
-          ),
+          Text('Description', style: new TextStyle(fontSize: 18)),
+          Text(item.description),
         ],
       ),
     );
   }
 
-  _buildStyleNoteHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12.0,
-      ),
-      child: Text(
-        "STYLE NOTE",
-        style: TextStyle(
-          color: Colors.grey[800],
+  Widget _buildReviewsPanel(Item item) {
+    return ExpansionTile(
+      title: Text('Reviews'),
+      children: <Widget>[
+        SingleChildScrollView(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: 50,
+            itemBuilder: (context, index) {
+              return Container(
+                padding: EdgeInsets.all(5),
+                decoration: new BoxDecoration(
+                  border: new BorderDirectional(
+                      start: new BorderSide(color: Colors.pink)),
+                ),
+                child: Text('Review'),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImages(Item item) {
+    final imageList = item.itemImages;
+    return Container(
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRect(
+          child: PhotoViewGallery.builder(
+            itemCount: imageList.length,
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: NetworkImage(
+                  imageList[index],
+                ),
+                // // Contained = the smallest possible size to fit one dimension of the screen
+                // minScale: PhotoViewComputedScale.contained * 0.8,
+                // // Covered = the smallest possible size to fit the whole screen
+                // maxScale: PhotoViewComputedScale.covered * 2,
+              );
+            },
+            scrollPhysics: BouncingScrollPhysics(),
+            // Set the background color to the "classic white"
+            backgroundDecoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            loadingChild: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  _buildStyleNoteData() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12.0,
-      ),
-      child: Text(
-        "Boys dress",
-        style: TextStyle(
-          color: Colors.grey[600],
-        ),
-      ),
-    );
-  }
-
-  _buildMoreInfoHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12.0,
-      ),
-      child: Text(
-        "MORE INFO",
-        style: TextStyle(
-          color: Colors.grey[800],
-        ),
-      ),
-    );
-  }
-
-  _buildMoreInfoData() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12.0,
-      ),
-      child: Text(
-        "Slightly used but still in good condition.",
-        style: TextStyle(
-          color: Colors.grey[600],
-        ),
-      ),
-    );
-  }
-
-  _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 50.0,
@@ -370,7 +152,7 @@ class _ItemDetailViewState extends State<ItemDetailView>
             flex: 1,
             child: RaisedButton(
               onPressed: () {},
-              color: Colors.grey,
+              color: Colors.lightBlueAccent,
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -383,7 +165,7 @@ class _ItemDetailViewState extends State<ItemDetailView>
                       width: 4.0,
                     ),
                     Text(
-                      "SAVE",
+                      "Wish",
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
@@ -395,7 +177,7 @@ class _ItemDetailViewState extends State<ItemDetailView>
             flex: 2,
             child: RaisedButton(
               onPressed: () {},
-              color: Colors.greenAccent,
+              color: Colors.pinkAccent,
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -408,7 +190,7 @@ class _ItemDetailViewState extends State<ItemDetailView>
                       width: 4.0,
                     ),
                     Text(
-                      "RENT NOW",
+                      "RENT",
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
