@@ -44,19 +44,19 @@ class HomeViewModel extends BaseModel {
   }
 
   Future fetchOperations() async {
-    print('\nfetch');
+    //TODO: FIX CATEGORIES ASAP
     try {
       Operations operationsResults = await _firestoreService.getOperationsFromDb();
-      //     await _firestoreService.getOperationsFromDb().then((val) {
-      //   //print('val categ: ' + val.categoriesMap);
-      //   return val;
-      // });
+          await _firestoreService.getOperationsFromDb().then((val) {
+        //print('val categ: ' + val.categoriesMap);
+        return val;
+      });
 
-      print('oper res ' + operationsResults.toString());
+      //print('oper res ' + operationsResults.toString());
       if (operationsResults.categoriesMap == null) {
         print('oper?null');
       } else {
-        print('oper has val');
+        //print('oper has val');
         print(operationsResults.serviceFee.toString());
         _operations = operationsResults;
       }

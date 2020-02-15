@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:renty_crud_version/locator.dart';
+import 'package:renty_crud_version/services/dialog_service.dart';
+import 'package:renty_crud_version/services/firestore_service.dart';
 import 'package:renty_crud_version/services/permission_service.dart';
 
 class LendingForm extends StatefulWidget {
@@ -11,6 +14,7 @@ class LendingForm extends StatefulWidget {
 
 class _LendingFormState extends State<LendingForm>
     with TickerProviderStateMixin {
+  DialogService _dialogService = locator<DialogService>();
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   List<Asset> images = List<Asset>();
   bool imagesPicked = false;
@@ -19,16 +23,15 @@ class _LendingFormState extends State<LendingForm>
       dailyCheckBoxValue = false,
       weeklyCheckBoxValue = false;
   bool pickUpType = false;
+  FocusNode _itemTitleNode, _itemDescNode;
+  FirestoreService _firestoreService = locator<FirestoreService>();
   // static var _focusNode = new FocusNode();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _focusNode.addListener(() {
-  //     setState(() {});
-  //     print('Has focus: $_focusNode.hasFocus');
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _itemDescNode = FocusNode();
+  }
 
   // // @override
   // // void dispose() {
@@ -54,6 +57,10 @@ class _LendingFormState extends State<LendingForm>
                   type: StepperType.vertical,
                   currentStep: this.currStep,
                   steps: _buildStepper(),
+                  controlsBuilder: (BuildContext context,
+                          {VoidCallback onStepContinue,
+                          VoidCallback onStepCancel}) =>
+                      Container(),
                   onStepTapped: (index) {
                     setState(() {
                       currStep = index;
@@ -66,13 +73,15 @@ class _LendingFormState extends State<LendingForm>
                     print("You are clicking the continue button.");
                   },
                 ),
-              )
+              ),
+              _buildButtons(),
             ])));
   }
 
   List<Step> _buildStepper() {
     List<Step> steps = [
       Step(
+          state: StepState.indexed,
           title: Text('Item Information'),
           subtitle: Text('What is your item?'),
           content: Column(
@@ -147,16 +156,24 @@ class _LendingFormState extends State<LendingForm>
         ],
         attribute: "item_name",
         maxLength: 30,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.next,
+        onFieldSubmitted: (val) {
+          FocusScope.of(context).requestFocus(_itemDescNode);
+        },
         decoration: new InputDecoration(
           labelText: "Item Name",
           border: OutlineInputBorder(),
         ),
+        onEditingComplete: () => _fbKey.currentState.save(),
       ),
       SizedBox(
         height: 20,
       ),
       FormBuilderTextField(
-        attribute: "text",
+        attribute: "item_desc",
         maxLines: 5,
         maxLength: 150,
         maxLengthEnforced: true,
@@ -170,6 +187,8 @@ class _LendingFormState extends State<LendingForm>
           labelText: "Item Description",
           border: OutlineInputBorder(),
         ),
+        focusNode: _itemDescNode,
+        onEditingComplete: () => _fbKey.currentState.save(),
       ),
     ];
   }
@@ -197,19 +216,24 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
+                    autovalidate: true,
                     keyboardType: TextInputType.numberWithOptions(),
                     attribute: "hourly_rent_rate",
                     maxLength: 4,
+                    onEditingComplete: () => _fbKey.currentState.save(),
                     decoration: new InputDecoration(
+                      isDense: true,
                       labelText: "Hourly Rent Rate",
                       border: OutlineInputBorder(),
                     ),
                   )
                 : null,
-            title: new Text(
-              'Hourly?',
-              style: TextStyle(fontSize: 14.0),
-            ),
+            title: !hourlyCheckBoxValue
+                ? new Text(
+                    'Hourly?',
+                    style: TextStyle(fontSize: 14.0),
+                  )
+                : Container(),
             controlAffinity: ListTileControlAffinity.leading,
             activeColor: Colors.green,
           ),
@@ -232,18 +256,23 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
-                    attribute: "hourly_rent_rate",
+                    autovalidate: true,
+                    onEditingComplete: () => _fbKey.currentState.save(),
+                    attribute: "daily_rent_rate",
                     maxLength: 4,
                     decoration: new InputDecoration(
                       labelText: "Daily Rent Rate",
                       border: OutlineInputBorder(),
                     ),
+                    keyboardType: TextInputType.numberWithOptions(),
                   )
                 : null,
-            title: new Text(
-              'Daily?',
-              style: TextStyle(fontSize: 14.0),
-            ),
+            title: !dailyCheckBoxValue
+                ? new Text(
+                    'Daily?',
+                    style: TextStyle(fontSize: 14.0),
+                  )
+                : Container(),
             controlAffinity: ListTileControlAffinity.leading,
             activeColor: Colors.green,
           ),
@@ -266,18 +295,24 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
+                    autovalidate: true,
+                    onEditingComplete: () => _fbKey.currentState.save(),
                     attribute: "weekly_rent_rate",
                     maxLength: 4,
                     decoration: new InputDecoration(
                       labelText: "Weekly Rent Rate",
                       border: OutlineInputBorder(),
                     ),
+                    keyboardType: TextInputType.numberWithOptions(),
+                    textInputAction: TextInputAction.done,
                   )
                 : null,
-            title: new Text(
-              'Weekly?',
-              style: TextStyle(fontSize: 14.0),
-            ),
+            title: !weeklyCheckBoxValue
+                ? new Text(
+                    'Weekly?',
+                    style: TextStyle(fontSize: 14.0),
+                  )
+                : Container(),
             controlAffinity: ListTileControlAffinity.leading,
             activeColor: Colors.green,
           ),
@@ -408,5 +443,80 @@ class _LendingFormState extends State<LendingForm>
       }
     });
   }
+
+  Widget _buildButtons() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      //mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        MaterialButton(
+          child: Text("Submit"),
+          onPressed: () {
+            if (_fbKey.currentState.saveAndValidate()) {
+              submitForm();
+              _dialogService.showConfirmationDialog(title: 'Item Added',description:  'Your item has been added and is waiting for approval from our admins. You will be notified when your item is approved. Thank you!');
+            }
+          },
+        ),
+        MaterialButton(
+          child: Text("Reset"),
+          onPressed: () {
+            _fbKey.currentState.reset();
+          },
+        ),
+      ],
+    );
+  }
+
+  void submitForm() {
+    String formItemName =
+        _fbKey.currentState.fields['item_name'].currentState.value;
+    print('item name: ' + formItemName);
+    String formItemDesc =
+        _fbKey.currentState.fields['item_desc'].currentState.value;
+    print('item desc: ' + formItemDesc);
+
+    var formHourly;
+    _fbKey.currentState.fields['hourly_rent_rate'] != null
+        ? formHourly =
+            _fbKey.currentState.fields['hourly_rent_rate'].currentState.value
+        : formHourly = null;
+    print(formHourly);
+    var formDaily;
+    _fbKey.currentState.fields['daily_rent_rate'] != null
+        ? formDaily =
+            _fbKey.currentState.fields['daily_rent_rate'].currentState.value
+        : formDaily = null;
+    print(formDaily);
+    var formWeekly;
+    _fbKey.currentState.fields['weekly_rent_rate'] != null
+        ? formWeekly =
+            _fbKey.currentState.fields['weekly_rent_rate'].currentState.value
+        : formWeekly = null;
+    print(formWeekly);
+    String formAcquisition =
+        _fbKey.currentState.fields['acquisition_type'].currentState.value;
+
+    DateTime pickupDate;
+    _fbKey.currentState.fields['date'] != null
+        ? pickupDate = _fbKey.currentState.fields['date'].currentState.value
+        : pickupDate = null;
+
+    Map rentDetails = {
+      'hourly_rate': formHourly,
+      'daily_rate': formDaily,
+      'weekly_rate': formWeekly,
+    };
+    print(rentDetails);
+    Map acquisitionMap = {
+      'acquisition_type': formAcquisition,
+      'pick_up_date': pickupDate,
+    };
+    print(acquisitionMap);
+
+    _firestoreService.submitLendingData(
+        formItemName, formItemDesc, rentDetails, acquisitionMap);
+  }
+
 //EOF
 }

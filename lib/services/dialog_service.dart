@@ -45,6 +45,20 @@ class DialogService {
     return _dialogCompleter.future;
   }
 
+  Future<DialogResponse> itemLendDialog({
+    String title,
+    String description,
+    String confirmationTitle = 'Okay',
+  }) {
+    _dialogCompleter = Completer<DialogResponse>();
+    _showDialogListener(DialogRequest(
+      title: title,
+      description: description,
+      buttonTitle: confirmationTitle,
+    ));
+    return _dialogCompleter.future;
+  }
+
   /// Completes the _dialogCompleter to resume the Future's execution call
   void dialogComplete(DialogResponse response) {
     _dialogNavigationKey.currentState.pop();

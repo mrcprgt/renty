@@ -78,5 +78,19 @@ class FirestoreService {
     return operationsFromFirebase;
   }
 
+  Future<void> submitLendingData(
+    String formItemName,
+    String formItemDescription,
+    Map rentDetails,
+    Map acquisitionMap,
+  ) async {
+    await _itemListingsCollectionReference.document().setData({
+      'item_name': formItemName,
+      'item_description': formItemDescription,
+      'rent_details': rentDetails,
+      'acquisition_map': acquisitionMap,
+    });
+  }
+
   //EOF
 }
