@@ -35,7 +35,7 @@ class SignUpViewModel extends BaseModel {
       await _dialogService.showDialog(
           //TODO: Spice up error messages!
           title: 'Sign Up Failure',
-          description: result);
+          description: 'A network error occured. Please try again.');
     }
   }
 }

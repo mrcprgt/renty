@@ -16,7 +16,10 @@ class StartUpView extends StatelessWidget {
                 child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                SizedBox(width: 300, height: 100, child: Image.asset('assets/images/logo.png')),
+                SizedBox(
+                    width: 300,
+                    height: 100,
+                    child: Image.asset('assets/images/logo.png')),
                 CircularProgressIndicator(
                     strokeWidth: 3,
                     //TODO: Find hex color of logo

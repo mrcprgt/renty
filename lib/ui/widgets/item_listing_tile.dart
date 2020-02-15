@@ -10,7 +10,7 @@ class ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(item.itemImages);
+    //print(item.itemImages);
     return InkWell(
       child: Container(
         // width: MediaQuery.of(context).size.width / 2,
@@ -31,7 +31,7 @@ class ItemTile extends StatelessWidget {
                       ? Image.network(
                           //FirebaseStorageImage(item.itemThumbnail).toString(),
                           //r_getGsReference(item),
-                          item.itemImages[1],
+                          item.itemImages[0],
                           height: MediaQuery.of(context).size.width / 2,
                           width: MediaQuery.of(context).size.width / 2,
                         )

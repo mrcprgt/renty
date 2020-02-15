@@ -3,8 +3,10 @@ import 'package:renty_crud_version/ui/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:renty_crud_version/constants/route_names.dart';
 import 'package:renty_crud_version/ui/views/item_details_view.dart';
+import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 import 'package:renty_crud_version/ui/views/login_view.dart';
 import 'package:renty_crud_version/ui/views/signup_view.dart';
+import 'package:renty_crud_version/viewmodels/item_lend_view_model.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -23,10 +25,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         routeName: settings.name,
         viewToShow: HomeView(),
       );
-    case HomeViewRoute:
+    case ItemLendViewRoute:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: HomeView(),
+        viewToShow: ItemLendView(),
       );
     case ItemDetailViewRoute:
       var receivedItem = settings.arguments as Item;

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:renty_crud_version/models/item.dart';
+import 'package:renty_crud_version/models/operations.dart';
 import 'package:renty_crud_version/models/user.dart';
 
 class FirestoreService {
@@ -12,6 +13,9 @@ class FirestoreService {
   final CollectionReference _itemListingsCollectionReference =
       Firestore.instance.collection('item_listings');
 
+  final CollectionReference _operationsCollectionReference =
+      Firestore.instance.collection("operations");
+
   final StreamController<List<Item>> _itemListingController =
       StreamController<List<Item>>.broadcast();
 
@@ -19,8 +23,7 @@ class FirestoreService {
     try {
       await _usersCollectionReference.document(user.id).setData(user.toJson());
     } catch (e) {
-      if(e is PlatformException)
-      return e.message;
+      if (e is PlatformException) return e.message;
     }
   }
 
@@ -55,4 +58,25 @@ class FirestoreService {
 
     return _itemListingController.stream;
   }
+
+  Future<Operations> getOperationsFromDb() async {
+    var documentRef = _operationsCollectionReference.document("items");
+    Operations operationsFromFirebase = new Operations();
+    documentRef.get().then((DocumentSnapshot ds) {
+      if (ds.exists) {
+        operationsFromFirebase.categoriesMap = ds.data['categories'];
+        operationsFromFirebase.serviceFee = ds.data['service_fee_%'];
+
+        print('service catg map ' +
+            operationsFromFirebase.categoriesMap.length.toString());
+        print('service oper ' + operationsFromFirebase.serviceFee.toString());
+        return operationsFromFirebase;
+      } else {
+        return operationsFromFirebase;
+      }
+    });
+    return operationsFromFirebase;
+  }
+
+  //EOF
 }

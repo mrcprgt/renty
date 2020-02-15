@@ -26,7 +26,7 @@ class HomeView extends StatelessWidget {
                       slivers: <Widget>[
                         _buildAppBar(context),
                         _buildSliverHeader(),
-                        _buildCategoriesBar(),
+                        _buildCategoriesBar(context, model),
                         _buildGridView(context, model),
                       ],
                     ),
@@ -57,14 +57,16 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoriesBar() {
+  Widget _buildCategoriesBar(BuildContext context, HomeViewModel model) {
     return SliverToBoxAdapter(
         child: Container(
       height: 60.0,
       //TODO: CHANGE THIS TO STREAM CATEGORIES
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: 3,
+        // itemCount: model.operations.categoriesMap.length,
+        //model.categories.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.all(8.0),
@@ -90,7 +92,8 @@ class HomeView extends StatelessWidget {
                     child: Row(
                       children: <Widget>[
                         Text(
-                          'Category',
+                          'dog',
+                          //model.categories[index].categoryName,
                           textScaleFactor: 0.75,
                           textAlign: TextAlign.center,
                           softWrap: true,
@@ -141,8 +144,8 @@ class HomeView extends StatelessWidget {
           )),
       staggeredTileBuilder: (int index) =>
           new StaggeredTile.count(2, index.isEven ? 2 : 1),
-      mainAxisSpacing: 4.0,
-      crossAxisSpacing: 4.0,
+      mainAxisSpacing: 8.0,
+      crossAxisSpacing: 8.0,
     );
   }
 
@@ -158,4 +161,6 @@ class HomeView extends StatelessWidget {
     }
     return Future.value(true);
   }
+
+//EOF
 }

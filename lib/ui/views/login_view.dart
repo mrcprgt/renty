@@ -14,58 +14,60 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelProvider<LoginViewModel>.withConsumer(
       viewModel: LoginViewModel(),
-      builder: (context, model, child) => Scaffold(
-          backgroundColor: Colors.white,
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    height: 300,
-                    child:
-                        Image.asset('assets/images/logo.png', fit: BoxFit.fill),
-                  ),
-                  InputField(
-                    placeholder: 'Email',
-                    controller: emailController,
-                    password: false,
-                  ),
-                  verticalSpaceSmall,
-                  InputField(
-                    placeholder: 'Password',
-                    password: true,
-                    controller: passwordController,
-                  ),
-                  verticalSpaceMedium,
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      BusyButton(
-                        title: 'Login',
-                        busy: model.busy,
-                        onPressed: () {
-                          model.logInWithEmail(
-                              emailController.text, passwordController.text);
-                        },
-                      )
-                    ],
-                  ),
-                  verticalSpaceMedium,
-                  TextLink(
-                    'Not registered? Tap here.',
-                    onPressed: () {
-                      Navigator.pushNamed(context, "SignUp");
-                    },
-                  )
-                ],
+      builder: (context, model, child) => SafeArea(
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 300,
+                      child: Image.asset('assets/images/logo.png',
+                          fit: BoxFit.fill),
+                    ),
+                    InputField(
+                      placeholder: 'Email',
+                      controller: emailController,
+                      password: false,
+                    ),
+                    verticalSpaceSmall,
+                    InputField(
+                      placeholder: 'Password',
+                      password: true,
+                      controller: passwordController,
+                    ),
+                    verticalSpaceMedium,
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        BusyButton(
+                          title: 'Login',
+                          busy: model.busy,
+                          onPressed: () {
+                            model.logInWithEmail(
+                                emailController.text, passwordController.text);
+                          },
+                        )
+                      ],
+                    ),
+                    verticalSpaceMedium,
+                    TextLink(
+                      'Not registered? Tap here.',
+                      onPressed: () {
+                        Navigator.pushNamed(context, "SignUp");
+                      },
+                    )
+                  ],
+                ),
               ),
-            ),
-          )),
+            )),
+      ),
     );
   }
 }
