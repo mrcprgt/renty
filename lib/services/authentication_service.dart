@@ -67,7 +67,8 @@ class AuthenticationService {
     }
   }
 
-  // Future<User> getUserDetails() async {
-  //   return currentUser;
-  // }
+  Future getUserDetails() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    return user.uid.toString();
+  }
 }

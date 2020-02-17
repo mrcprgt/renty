@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:renty_crud_version/models/item.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ItemTile extends StatelessWidget {
   final Item item;
@@ -24,16 +25,19 @@ class ItemTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                  child: item.itemImages != null
-                      ? Image.network(
-                          item.itemImages[0],
-                          fit: BoxFit.cover,
-                          // height: MediaQuery.of(context).size.width / 2,
-                          // width: MediaQuery.of(context).size.width / 2,
-                        )
-                      : Center(
-                          child: Icon(Icons.warning),
-                        )),
+                  child: Center(
+                child: item.itemImages != null
+                    ? CachedNetworkImage(
+                        imageUrl: item.itemImages[0],
+                        placeholder: (context, url) =>
+                            new CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            new Icon(Icons.error),
+                      )
+                    : Center(
+                        child: Icon(Icons.warning),
+                      ),
+              )),
               SizedBox(
                 height: 10.0,
               ),

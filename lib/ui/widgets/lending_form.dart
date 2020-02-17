@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:renty_crud_version/locator.dart';
+import 'package:renty_crud_version/services/authentication_service.dart';
 import 'package:renty_crud_version/services/dialog_service.dart';
 import 'package:renty_crud_version/services/firestore_service.dart';
 import 'package:renty_crud_version/services/permission_service.dart';
@@ -23,9 +27,16 @@ class _LendingFormState extends State<LendingForm>
       dailyCheckBoxValue = false,
       weeklyCheckBoxValue = false;
   bool pickUpType = false;
-  FocusNode _itemTitleNode, _itemDescNode;
-  FirestoreService _firestoreService = locator<FirestoreService>();
+  FocusNode _itemDescNode;
+  bool accept_terms = false;
+
+  var owner;
+  var submissionDate;
   // static var _focusNode = new FocusNode();
+
+  FirestoreService _firestoreService = locator<FirestoreService>();
+  AuthenticationService _authenticationService =
+      locator<AuthenticationService>();
 
   @override
   void initState() {
@@ -33,11 +44,11 @@ class _LendingFormState extends State<LendingForm>
     _itemDescNode = FocusNode();
   }
 
-  // // @override
-  // // void dispose() {
-  // //   _focusNode.dispose();
-  // //   super.dispose();
-  // // }
+  @override
+  void dispose() {
+    _itemDescNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,26 +63,25 @@ class _LendingFormState extends State<LendingForm>
                   'accept_terms': false,
                 },
                 autovalidate: true,
-                child: Stepper(
-                  physics: ClampingScrollPhysics(),
-                  type: StepperType.vertical,
-                  currentStep: this.currStep,
-                  steps: _buildStepper(),
-                  controlsBuilder: (BuildContext context,
-                          {VoidCallback onStepContinue,
-                          VoidCallback onStepCancel}) =>
-                      Container(),
-                  onStepTapped: (index) {
-                    setState(() {
-                      currStep = index;
-                    });
-                  },
-                  onStepCancel: () {
-                    print("You are clicking the cancel button.");
-                  },
-                  onStepContinue: () {
-                    print("You are clicking the continue button.");
-                  },
+                child: Column(
+                  children: <Widget>[
+                    Stepper(
+                      physics: ClampingScrollPhysics(),
+                      type: StepperType.vertical,
+                      currentStep: this.currStep,
+                      steps: _buildStepper(),
+                      controlsBuilder: (BuildContext context,
+                              {VoidCallback onStepContinue,
+                              VoidCallback onStepCancel}) =>
+                          Container(),
+                      onStepTapped: (index) {
+                        setState(() {
+                          currStep = index;
+                        });
+                      },
+                    ),
+                    _buildFormBuilderCheckbox(),
+                  ],
                 ),
               ),
               _buildButtons(),
@@ -132,15 +142,18 @@ class _LendingFormState extends State<LendingForm>
     return steps;
   }
 
-  FormBuilderCheckbox buildFormBuilderCheckbox() {
-    return FormBuilderCheckbox(
-      attribute: 'accept_terms',
-      label: Text("I have read and agree to the terms and conditions"),
-      validators: [
-        FormBuilderValidators.requiredTrue(
-          errorText: "You must accept terms and conditions to continue",
-        ),
-      ],
+  Widget _buildFormBuilderCheckbox() {
+    return Center(
+      child: FormBuilderCheckbox(
+        decoration: InputDecoration(),
+        attribute: 'accept_terms',
+        label: Text("I have read and agree to the terms and conditions"),
+        validators: [
+          FormBuilderValidators.requiredTrue(
+            errorText: "You must accept terms and conditions to continue",
+          ),
+        ],
+      ),
     );
   }
 
@@ -167,7 +180,8 @@ class _LendingFormState extends State<LendingForm>
           labelText: "Item Name",
           border: OutlineInputBorder(),
         ),
-        onEditingComplete: () => _fbKey.currentState.save(),
+        onEditingComplete: () =>
+            _fbKey.currentState.fields['item_name'].currentState.validate(),
       ),
       SizedBox(
         height: 20,
@@ -188,7 +202,8 @@ class _LendingFormState extends State<LendingForm>
           border: OutlineInputBorder(),
         ),
         focusNode: _itemDescNode,
-        onEditingComplete: () => _fbKey.currentState.save(),
+        onEditingComplete: () =>
+            _fbKey.currentState.fields['item_desc'].currentState.validate(),
       ),
     ];
   }
@@ -216,11 +231,12 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
-                    autovalidate: true,
                     keyboardType: TextInputType.numberWithOptions(),
                     attribute: "hourly_rent_rate",
                     maxLength: 4,
-                    onEditingComplete: () => _fbKey.currentState.save(),
+                    onEditingComplete: () => _fbKey
+                        .currentState.fields['hourly_rent_rate'].currentState
+                        .validate(),
                     decoration: new InputDecoration(
                       isDense: true,
                       labelText: "Hourly Rent Rate",
@@ -256,8 +272,9 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
-                    autovalidate: true,
-                    onEditingComplete: () => _fbKey.currentState.save(),
+                    onEditingComplete: () => _fbKey
+                        .currentState.fields['daily_rent_rate'].currentState
+                        .validate(),
                     attribute: "daily_rent_rate",
                     maxLength: 4,
                     decoration: new InputDecoration(
@@ -295,8 +312,9 @@ class _LendingFormState extends State<LendingForm>
                       FormBuilderValidators.required(
                           errorText: "Please fill out this field."),
                     ],
-                    autovalidate: true,
-                    onEditingComplete: () => _fbKey.currentState.save(),
+                    onEditingComplete: () => _fbKey
+                        .currentState.fields['weekly_rent_rate'].currentState
+                        .validate(),
                     attribute: "weekly_rent_rate",
                     maxLength: 4,
                     decoration: new InputDecoration(
@@ -331,20 +349,26 @@ class _LendingFormState extends State<LendingForm>
 
   List<Widget> _buildPickupDetails() {
     return <Widget>[
+      SizedBox(
+        height: 10,
+      ),
       FormBuilderRadio(
         decoration: new InputDecoration(
           labelText: "Item Acquisition",
           border: OutlineInputBorder(),
         ),
+        validators: [
+          FormBuilderValidators.required(
+              errorText: "Please fill out this field."),
+        ],
         attribute: "acquisition_type",
         options: [
           FormBuilderFieldOption(value: "Drop Off"),
           FormBuilderFieldOption(value: "Pickup via Pandalivery"),
         ],
         onChanged: (value) {
-          _fbKey.currentState.save();
-          print(_fbKey
-              .currentState.fields["acquisition_type"].currentState.value);
+          _fbKey.currentState.fields['acquisition_type'].currentState
+              .validate();
           _fbKey.currentState.fields["acquisition_type"].currentState.value ==
                   "Pickup via Pandalivery"
               ? setState(() {
@@ -445,30 +469,28 @@ class _LendingFormState extends State<LendingForm>
   }
 
   Widget _buildButtons() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      //mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        MaterialButton(
-          child: Text("Submit"),
-          onPressed: () {
-            if (_fbKey.currentState.saveAndValidate()) {
-              submitForm();
-              _dialogService.showConfirmationDialog(title: 'Item Added',description:  'Your item has been added and is waiting for approval from our admins. You will be notified when your item is approved. Thank you!');
-            }
-          },
-        ),
-        MaterialButton(
-          child: Text("Reset"),
-          onPressed: () {
-            _fbKey.currentState.reset();
-          },
-        ),
-      ],
+    return Center(
+      child: RaisedButton(
+        child: Text("Submit"),
+        onPressed: () {
+          if (_fbKey.currentState.saveAndValidate()) {
+            submitForm();
+            _dialogService.showConfirmationDialog(
+                title: 'Item Added',
+                description:
+                    'Your item has been added and is waiting for approval from our admins. You will be notified when your item is approved. Thank you!');
+          } else {
+            _dialogService.showDialog(
+                title: 'Something went wrong.',
+                description:
+                    ' Please review your details and re-submit, Thank you.');
+          }
+        },
+      ),
     );
   }
 
-  void submitForm() {
+  Future<void> submitForm() async {
     String formItemName =
         _fbKey.currentState.fields['item_name'].currentState.value;
     print('item name: ' + formItemName);
@@ -487,13 +509,11 @@ class _LendingFormState extends State<LendingForm>
         ? formDaily =
             _fbKey.currentState.fields['daily_rent_rate'].currentState.value
         : formDaily = null;
-    print(formDaily);
     var formWeekly;
     _fbKey.currentState.fields['weekly_rent_rate'] != null
         ? formWeekly =
             _fbKey.currentState.fields['weekly_rent_rate'].currentState.value
         : formWeekly = null;
-    print(formWeekly);
     String formAcquisition =
         _fbKey.currentState.fields['acquisition_type'].currentState.value;
 
@@ -507,15 +527,17 @@ class _LendingFormState extends State<LendingForm>
       'daily_rate': formDaily,
       'weekly_rate': formWeekly,
     };
-    print(rentDetails);
     Map acquisitionMap = {
       'acquisition_type': formAcquisition,
       'pick_up_date': pickupDate,
     };
     print(acquisitionMap);
+    submissionDate = DateTime.now();
+    owner = await _authenticationService.getUserDetails();
+    print(submissionDate.toString() + " " + owner.toString());
 
-    _firestoreService.submitLendingData(
-        formItemName, formItemDesc, rentDetails, acquisitionMap);
+    _firestoreService.submitLendingData(formItemName, formItemDesc, rentDetails,
+        acquisitionMap, owner, submissionDate, images);
   }
 
 //EOF
