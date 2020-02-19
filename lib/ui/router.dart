@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:renty_crud_version/constants/route_names.dart';
 import 'package:renty_crud_version/ui/views/item_details_view.dart';
 import 'package:renty_crud_version/ui/views/item_lend_view.dart';
+import 'package:renty_crud_version/ui/views/item_transaction_view.dart';
 import 'package:renty_crud_version/ui/views/login_view.dart';
 import 'package:renty_crud_version/ui/views/signup_view.dart';
 import 'package:renty_crud_version/viewmodels/item_lend_view_model.dart';
@@ -34,6 +35,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       var receivedItem = settings.arguments as Item;
       return MaterialPageRoute(
           builder: (_) => ItemDetailView(receivedItem: receivedItem));
+    case ItemTransactionViewRoute:
+      var receivedItem = settings.arguments as Item;
+      return MaterialPageRoute(
+          builder: (_) => ItemTransactionView(receivedItem: receivedItem));
     default:
       return MaterialPageRoute(
           builder: (_) => Scaffold(

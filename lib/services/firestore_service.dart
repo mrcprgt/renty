@@ -13,7 +13,7 @@ class FirestoreService {
       Firestore.instance.collection('users');
 
   final CollectionReference _itemListingsCollectionReference =
-      Firestore.instance.collection('item_listings');
+      Firestore.instance.collection('items');
 
   final CollectionReference _operationsCollectionReference =
       Firestore.instance.collection("operations");
@@ -52,7 +52,8 @@ class FirestoreService {
       if (itemListSnapshot.documents.isNotEmpty) {
         var items = itemListSnapshot.documents
             .map((snapshot) => Item.fromMap(snapshot.data, snapshot.documentID))
-            .where((mappedItem) => mappedItem.itemName != null)
+            .where((mappedItem) =>
+                mappedItem.itemName != null && mappedItem.isApproved)
             .toList();
 
         // Add the posts onto the controller
@@ -115,8 +116,10 @@ class FirestoreService {
       'item_description': formItemDescription,
       'rent_details': rentDetails,
       'acquisition_map': acquisitionMap,
-      'owner': owner,
-      'submission_date': submissionDate
+      'lender': owner,
+      'date_entered': submissionDate,
+      'is_approved': false,
+      'is_currently_rented': false,
     });
     print('doc id:' + docRef.documentID.toString());
     var imgRef = await uploadImages(asset, docRef.documentID);
@@ -124,7 +127,7 @@ class FirestoreService {
     await _itemListingsCollectionReference
         .document(docRef.documentID)
         .updateData({
-      'item_images': imgRef,
+      'pictures': imgRef,
     });
   }
 

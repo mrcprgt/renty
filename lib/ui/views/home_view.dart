@@ -143,7 +143,7 @@ class HomeView extends StatelessWidget {
             ),
           )),
       staggeredTileBuilder: (int index) =>
-          new StaggeredTile.count(2, index.isEven ? 2 : 1),
+          new StaggeredTile.count(2, index.isEven ? 2 : 2),
       mainAxisSpacing: 8.0,
       crossAxisSpacing: 8.0,
     );

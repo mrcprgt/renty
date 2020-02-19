@@ -11,6 +11,7 @@ class ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //var rentingDetails = item.rentingDetails.entries.toList();
     //print(item.itemImages);
     return InkWell(
       child: Container(
@@ -28,6 +29,7 @@ class ItemTile extends StatelessWidget {
                   child: Center(
                 child: item.itemImages != null
                     ? CachedNetworkImage(
+                        fit: BoxFit.fitWidth,
                         imageUrl: item.itemImages[0],
                         placeholder: (context, url) =>
                             new CircularProgressIndicator(),
@@ -65,19 +67,14 @@ class ItemTile extends StatelessWidget {
                       children: <Widget>[
                         RichText(
                           text: TextSpan(
-                            text: '₱' + item.rentRate.toString(),
+                            text: '₱' +
+                                item.rentingDetails['perDay'].toString(),
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400),
                           ),
                         ),
-                        RichText(
-                          text: TextSpan(
-                              text: ' / ' + item.rentType.toString(),
-                              style: TextStyle(
-                                  color: Colors.black87, fontSize: 12)),
-                        )
                       ],
                     ),
                     // SizedBox(

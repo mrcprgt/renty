@@ -1,14 +1,13 @@
-import 'dart:typed_data';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:renty_crud_version/constants/route_names.dart';
 import 'package:renty_crud_version/locator.dart';
 import 'package:renty_crud_version/services/authentication_service.dart';
 import 'package:renty_crud_version/services/dialog_service.dart';
 import 'package:renty_crud_version/services/firestore_service.dart';
+import 'package:renty_crud_version/services/navigation_service.dart';
 import 'package:renty_crud_version/services/permission_service.dart';
 
 class LendingForm extends StatefulWidget {
@@ -20,6 +19,7 @@ class _LendingFormState extends State<LendingForm>
     with TickerProviderStateMixin {
   DialogService _dialogService = locator<DialogService>();
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  NavigationService _navigationService = locator<NavigationService>();
   List<Asset> images = List<Asset>();
   bool imagesPicked = false;
   int currStep = 0;
@@ -232,10 +232,10 @@ class _LendingFormState extends State<LendingForm>
                           errorText: "Please fill out this field."),
                     ],
                     keyboardType: TextInputType.numberWithOptions(),
-                    attribute: "hourly_rent_rate",
+                    attribute: "perHour",
                     maxLength: 4,
                     onEditingComplete: () => _fbKey
-                        .currentState.fields['hourly_rent_rate'].currentState
+                        .currentState.fields['perHour'].currentState
                         .validate(),
                     decoration: new InputDecoration(
                       isDense: true,
@@ -273,9 +273,9 @@ class _LendingFormState extends State<LendingForm>
                           errorText: "Please fill out this field."),
                     ],
                     onEditingComplete: () => _fbKey
-                        .currentState.fields['daily_rent_rate'].currentState
+                        .currentState.fields['perDay'].currentState
                         .validate(),
-                    attribute: "daily_rent_rate",
+                    attribute: "perDay",
                     maxLength: 4,
                     decoration: new InputDecoration(
                       labelText: "Daily Rent Rate",
@@ -313,9 +313,9 @@ class _LendingFormState extends State<LendingForm>
                           errorText: "Please fill out this field."),
                     ],
                     onEditingComplete: () => _fbKey
-                        .currentState.fields['weekly_rent_rate'].currentState
+                        .currentState.fields['perWeek'].currentState
                         .validate(),
-                    attribute: "weekly_rent_rate",
+                    attribute: "perWeek",
                     maxLength: 4,
                     decoration: new InputDecoration(
                       labelText: "Weekly Rent Rate",
@@ -445,9 +445,15 @@ class _LendingFormState extends State<LendingForm>
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        enableCamera: true,
-        maxImages: 5,
-      );
+          enableCamera: true,
+          maxImages: 5,
+          materialOptions: MaterialOptions(
+              actionBarTitle: 'Select Pictures',
+              actionBarColor: '#ff6781',
+              //startInAllView: true,
+              useDetailsView: true,
+              textOnNothingSelected: 'Please pick at least 3 pictures.',
+              allViewTitle: 'All Images'));
     } on Exception catch (e) {
       error = e.toString();
     }
@@ -474,6 +480,7 @@ class _LendingFormState extends State<LendingForm>
         child: Text("Submit"),
         onPressed: () {
           if (_fbKey.currentState.saveAndValidate()) {
+            _navigationService.navigateTo(HomeViewRoute);
             submitForm();
             _dialogService.showConfirmationDialog(
                 title: 'Item Added',
@@ -491,6 +498,7 @@ class _LendingFormState extends State<LendingForm>
   }
 
   Future<void> submitForm() async {
+    //TODO: CONVERT PAY DETAILS TO INT/DOUBLE
     String formItemName =
         _fbKey.currentState.fields['item_name'].currentState.value;
     print('item name: ' + formItemName);
@@ -499,20 +507,17 @@ class _LendingFormState extends State<LendingForm>
     print('item desc: ' + formItemDesc);
 
     var formHourly;
-    _fbKey.currentState.fields['hourly_rent_rate'] != null
-        ? formHourly =
-            _fbKey.currentState.fields['hourly_rent_rate'].currentState.value
+    _fbKey.currentState.fields['perHour'] != null
+        ? formHourly = _fbKey.currentState.fields['perHour'].currentState.value
         : formHourly = null;
     print(formHourly);
     var formDaily;
-    _fbKey.currentState.fields['daily_rent_rate'] != null
-        ? formDaily =
-            _fbKey.currentState.fields['daily_rent_rate'].currentState.value
+    _fbKey.currentState.fields['perDay'] != null
+        ? formDaily = _fbKey.currentState.fields['perDay'].currentState.value
         : formDaily = null;
     var formWeekly;
-    _fbKey.currentState.fields['weekly_rent_rate'] != null
-        ? formWeekly =
-            _fbKey.currentState.fields['weekly_rent_rate'].currentState.value
+    _fbKey.currentState.fields['perWeek'] != null
+        ? formWeekly = _fbKey.currentState.fields['perWeek'].currentState.value
         : formWeekly = null;
     String formAcquisition =
         _fbKey.currentState.fields['acquisition_type'].currentState.value;
@@ -523,9 +528,9 @@ class _LendingFormState extends State<LendingForm>
         : pickupDate = null;
 
     Map rentDetails = {
-      'hourly_rate': formHourly,
-      'daily_rate': formDaily,
-      'weekly_rate': formWeekly,
+      'perHour': formHourly,
+      'perDay': formDaily,
+      'perWeek': formWeekly,
     };
     Map acquisitionMap = {
       'acquisition_type': formAcquisition,

@@ -1,9 +1,7 @@
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:photo_view/photo_view_gallery.dart';
@@ -19,7 +17,6 @@ class ItemDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelProvider<ItemDetailViewModel>.withConsumer(
       viewModel: ItemDetailViewModel(),
-      //onModelReady: (model) => model.listenToItemListings(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
           appBar: AppBar(
@@ -35,11 +32,12 @@ class ItemDetailView extends StatelessWidget {
                 _buildImages(receivedItem),
                 _buildProductCard(receivedItem),
                 _buildDescriptionPanel(receivedItem),
-                _buildReviewsPanel(receivedItem),
+                //_buildReviewsPanel(receivedItem),
               ]),
             ),
           ),
-          bottomNavigationBar: _buildBottomNavigationBar(context),
+          bottomNavigationBar:
+              _buildBottomNavigationBar(context, model, receivedItem),
         ),
       ),
     );
@@ -57,12 +55,35 @@ class ItemDetailView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              //ITEM NAME
               Text(item.itemName,
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24)),
-              Text(
-                item.rentRate.toString() + ' / ' + item.rentType.toString(),
-                style: TextStyle(fontWeight: FontWeight.w400),
-              )
+              DataTable(
+                columns: [
+                  DataColumn(label: Text('Duration')),
+                  DataColumn(label: Text('Price')),
+                ],
+                rows: [
+                  DataRow(cells: [
+                    DataCell(Text('Hourly')),
+                    DataCell(Text(item.rentingDetails['perHour'].toString())),
+                  ]),
+                  DataRow(cells: [
+                    DataCell(Text('Daily')),
+                    DataCell(Text(item.rentingDetails['perDay'].toString())),
+                  ]),
+                  DataRow(cells: [
+                    DataCell(Text('Weekly')),
+                    DataCell(Text(item.rentingDetails['perWeek'].toString())),
+                  ]),
+                ],
+              ),
+              // Text(
+              //   item.rentingDetails[1].toString() +
+              //       ' / ' +
+              //       item.rentingDetails['perDay'].toString(),
+              //   style: TextStyle(fontWeight: FontWeight.w400),
+              // )
             ],
           )),
     );
@@ -76,7 +97,7 @@ class ItemDetailView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('Description', style: new TextStyle(fontSize: 18)),
-          Text(item.description),
+          Text(item.itemDescription),
         ],
       ),
     );
@@ -139,7 +160,8 @@ class ItemDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
+  Widget _buildBottomNavigationBar(
+      BuildContext context, ItemDetailViewModel model, Item item) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 50.0,
@@ -176,7 +198,9 @@ class ItemDetailView extends StatelessWidget {
           Flexible(
             flex: 2,
             child: RaisedButton(
-              onPressed: () {},
+              onPressed: () {
+                model.goToTransactionView(item);
+              },
               color: Colors.pinkAccent,
               child: Center(
                 child: Row(
