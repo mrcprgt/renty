@@ -53,6 +53,8 @@ class ItemTile extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       item.itemName,
+                      overflow: TextOverflow.clip,
+                      maxLines: 2,
                       style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w800,

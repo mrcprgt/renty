@@ -19,17 +19,29 @@ class ItemDetailView extends StatelessWidget {
       viewModel: ItemDetailViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.pinkAccent,
-            title: Text('Item Details'),
-            centerTitle: true,
-            //toolbarOpacity: 2.0,
+          extendBodyBehindAppBar: true,
+          appBar: new AppBar(
+            automaticallyImplyLeading: true,
+            leading: new Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: new Material(
+                    color: Colors.pink,
+                    shape: new CircleBorder(),
+                    child: Icon(Icons.arrow_back)),
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
               child: Column(children: <Widget>[
-                _buildImages(receivedItem),
+                _buildImageGallery(receivedItem),
                 _buildProductCard(receivedItem),
                 _buildDescriptionPanel(receivedItem),
                 //_buildReviewsPanel(receivedItem),
@@ -44,87 +56,120 @@ class ItemDetailView extends StatelessWidget {
   }
 
   Widget _buildProductCard(Item item) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Container(
-          padding: EdgeInsets.all(5),
-          decoration: new BoxDecoration(
-            border: new BorderDirectional(
-                start: new BorderSide(color: Colors.pink, width: 5)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              //ITEM NAME
-              Text(item.itemName,
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24)),
-              DataTable(
-                columns: [
-                  DataColumn(label: Text('Duration')),
-                  DataColumn(label: Text('Price')),
-                ],
-                rows: [
-                  DataRow(cells: [
-                    DataCell(Text('Hourly')),
-                    DataCell(Text(item.rentingDetails['perHour'].toString())),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text('Daily')),
-                    DataCell(Text(item.rentingDetails['perDay'].toString())),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text('Weekly')),
-                    DataCell(Text(item.rentingDetails['perWeek'].toString())),
-                  ]),
-                ],
-              ),
-              // Text(
-              //   item.rentingDetails[1].toString() +
-              //       ' / ' +
-              //       item.rentingDetails['perDay'].toString(),
-              //   style: TextStyle(fontWeight: FontWeight.w400),
-              // )
-            ],
-          )),
+    return Column(
+      children: <Widget>[
+        Container(
+            padding: EdgeInsets.all(5),
+            decoration: new BoxDecoration(
+              border: new BorderDirectional(
+                  start: new BorderSide(color: Colors.pink, width: 5)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(item.itemName,
+                    overflow: TextOverflow.clip,
+                    maxLines: 2,
+                    style:
+                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24)),
+              ],
+            )),
+        Container(
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <
+                  Widget>[
+            DataTable(
+              headingRowHeight: 25,
+              dataRowHeight: 25,
+              columns: [
+                DataColumn(label: Center(child: Text('Hourly'))),
+                DataColumn(label: Center(child: Text('Daily'))),
+                DataColumn(label: Center(child: Text('Weekly'))),
+              ],
+              rows: [
+                DataRow(cells: [
+                  DataCell(
+                      Text("₱ " + item.rentingDetails['perHour'].toString())),
+                  DataCell(
+                      Text("₱ " + item.rentingDetails['perDay'].toString())),
+                  DataCell(
+                      Text("₱ " + item.rentingDetails['perWeek'].toString())),
+                ]),
+              ],
+            ),
+          ]),
+        ),
+      ],
     );
   }
 
   Widget _buildDescriptionPanel(Item item) {
-    return Container(
-      alignment: Alignment.topLeft,
-      padding: EdgeInsets.all(5),
+    return DefaultTabController(
+      length: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text('Description', style: new TextStyle(fontSize: 18)),
-          Text(item.itemDescription),
+          TabBar(
+            indicatorColor: Colors.pink,
+            // controller: tabController,
+            tabs: <Widget>[
+              Tab(
+                child: Text(
+                  "DETAILS",
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  "REVIEWS",
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            height: 250.0,
+            child: TabBarView(
+              //controller: tabController,
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Text(
+                    item.itemDescription,
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Text(
+                  "5 STAR VERY SOLID PRODUCT WILL RENT AGAIN",
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
-  }
 
-  Widget _buildReviewsPanel(Item item) {
-    return ExpansionTile(
-      title: Text('Reviews'),
-      children: <Widget>[
-        SingleChildScrollView(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: 50,
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(5),
-                decoration: new BoxDecoration(
-                  border: new BorderDirectional(
-                      start: new BorderSide(color: Colors.pink)),
-                ),
-                child: Text('Review'),
-              );
-            },
-          ),
-        ),
-      ],
-    );
+    // return Container(
+    //   alignment: Alignment.topLeft,
+    //   padding: EdgeInsets.all(5),
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: <Widget>[
+    //       Text('Description', style: new TextStyle(fontSize: 20)),
+    //       Text(item.itemDescription),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _buildImages(Item item) {
@@ -154,6 +199,31 @@ class ItemDetailView extends StatelessWidget {
             loadingChild: Center(
               child: CircularProgressIndicator(),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageGallery(Item item) {
+    final imageList = item.itemImages;
+    return Container(
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: PhotoViewGallery.builder(
+          scrollPhysics: const BouncingScrollPhysics(),
+          builder: (BuildContext context, int index) {
+            return PhotoViewGalleryPageOptions(
+              imageProvider: NetworkImage(
+                imageList[index],
+              ),
+              initialScale: PhotoViewComputedScale.contained * 0.8,
+              //heroAttributes: HeroAttributes(tag: imageList[index].id),
+            );
+          },
+          itemCount: imageList.length,
+          loadingChild: Center(
+            child: CircularProgressIndicator(),
           ),
         ),
       ),
