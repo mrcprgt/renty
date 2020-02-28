@@ -1,4 +1,3 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -92,11 +91,4 @@ class ItemTile extends StatelessWidget {
     );
   }
 
-  String _getGsReference(Item item) {
-    final FirebaseStorage storage = FirebaseStorage.instance;
-    var gsReference = storage.getReferenceFromUrl(item.itemImages);
-    var gsurl = storage.ref().getDownloadURL();
-    print(gsurl);
-    return gsurl.toString();
-  }
 }

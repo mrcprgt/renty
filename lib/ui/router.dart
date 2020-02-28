@@ -7,7 +7,6 @@ import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 import 'package:renty_crud_version/ui/views/item_transaction_view.dart';
 import 'package:renty_crud_version/ui/views/login_view.dart';
 import 'package:renty_crud_version/ui/views/signup_view.dart';
-import 'package:renty_crud_version/viewmodels/item_lend_view_model.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {

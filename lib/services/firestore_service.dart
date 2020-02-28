@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:renty_crud_version/locator.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/models/operations.dart';
 import 'package:renty_crud_version/models/user.dart';
+import 'package:renty_crud_version/services/push_notification_service.dart';
 
 class FirestoreService {
   final CollectionReference _usersCollectionReference =
@@ -17,6 +20,8 @@ class FirestoreService {
 
   final CollectionReference _operationsCollectionReference =
       Firestore.instance.collection("operations");
+
+  FirebaseMessaging _fcm = FirebaseMessaging();
 
   final StreamController<List<Item>> _itemListingController =
       StreamController<List<Item>>.broadcast();
@@ -111,6 +116,7 @@ class FirestoreService {
       var owner,
       DateTime submissionDate,
       List<Asset> asset) async {
+        var lenderToken = await _fcm.getToken();
     DocumentReference docRef = await _itemListingsCollectionReference.add({
       'item_name': formItemName,
       'item_description': formItemDescription,
@@ -120,8 +126,10 @@ class FirestoreService {
       'date_entered': submissionDate,
       'is_approved': false,
       'is_currently_rented': false,
+      'lender_token': lenderToken,
     });
     print('doc id:' + docRef.documentID.toString());
+    print('fcm token:' + lenderToken.toString());
     var imgRef = await uploadImages(asset, docRef.documentID);
     print('imgref: ' + imgRef.toString());
     await _itemListingsCollectionReference

@@ -15,7 +15,6 @@ class StartUpViewModel extends BaseModel {
 
   Future handleStartUpLogic() async {
     //Initialize push notif service.
-
     await _pushNotificationService.initialise();
 
     //Check if user is logged in.

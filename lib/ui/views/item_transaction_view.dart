@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/models/item.dart';
