@@ -40,6 +40,7 @@ class HomeView extends StatelessWidget {
               child: Icon(Icons.add),
               onPressed: () => model.goToItemLendPage(),
             ),
+            bottomNavigationBar: _buildBottomNavBar(context, model),
           ),
         ),
       ),
@@ -122,9 +123,13 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildSearchField(BuildContext context, HomeViewModel model) {
+    //TODO: make suggestions go to item detail
     return new TypeAheadField(
+      hideSuggestionsOnKeyboardHide: true,
+      noItemsFoundBuilder: (context) =>
+          Text('No item found. Try putting it on the wish list!'),
       textFieldConfiguration: TextFieldConfiguration(
-          autofocus: true,
+          autofocus: false,
           style: TextStyle(),
           decoration: InputDecoration(
             prefixIcon: Icon(Icons.search),
@@ -187,6 +192,24 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  Widget _buildBottomNavBar(BuildContext context, HomeViewModel model) {
+    return BottomNavigationBar(
+      currentIndex: 1,
+      items: [
+        BottomNavigationBarItem(
+          icon: new Icon(Icons.home),
+          title: new Text('Home'),
+        ),
+        BottomNavigationBarItem(
+          icon: new Icon(Icons.person),
+          title: new Text('Profile'),
+        ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.settings), title: Text('Settings'))
+      ],
+    );
+  }
+
   //TODO : Double tap back to exit.
   Future<bool> onWillPop() {
     DateTime currentBackPressTime;
@@ -201,4 +224,15 @@ class HomeView extends StatelessWidget {
   }
 
 //EOF
+}
+
+class BottomNavigationBarProvider with ChangeNotifier {
+  int _currentIndex = 0;
+
+  get currentIndex => _currentIndex;
+
+  set currentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
 }

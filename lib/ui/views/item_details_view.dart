@@ -198,7 +198,7 @@ class ItemDetailView extends StatelessWidget {
             ),
             // minScale: PhotoViewComputedScale.contained * 0.8,
             // maxScale: PhotoViewComputedScale.covered * 1.1,
-            initialScale: PhotoViewComputedScale.covered * 0.6,
+            initialScale: PhotoViewComputedScale.covered,
             //heroAttributes: HeroAttributes(tag: imageList[index].id),
           );
         },
