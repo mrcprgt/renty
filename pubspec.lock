@@ -208,7 +208,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_typeahead:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_typeahead
       url: "https://pub.dartlang.org"

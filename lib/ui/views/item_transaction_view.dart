@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/models/item.dart';
@@ -36,7 +37,7 @@ class ItemTransactionView extends StatelessWidget {
         ),
         _buildImages(item),
         _buildExpansionTile(item),
-        // _buildProcedures(item),
+        _buildProcedures(item),
       ],
     ));
   }
@@ -85,7 +86,18 @@ class ItemTransactionView extends StatelessWidget {
     );
   }
 
-  // Widget _buildProcedures(Item item) {
-  //   return Radio
-  // }
+  Widget _buildProcedures(Item item) {
+    List<FormBuilderFieldOption> radioOptions;
+    if (item.rentingDetails['perHour'] != null) {
+      radioOptions.add(FormBuilderFieldOption(value: "Hourly"));
+    }
+    if (item.rentingDetails['perDay'] != null) {
+      radioOptions.add(FormBuilderFieldOption(value: "Daily"));
+    }
+    if (item.rentingDetails['perWeek'] != null) {
+      radioOptions.add(FormBuilderFieldOption(value: "Weekly"));
+    }
+    return FormBuilderRadio(
+        initialValue: "null", attribute: "rent_type", options: radioOptions);
+  }
 }

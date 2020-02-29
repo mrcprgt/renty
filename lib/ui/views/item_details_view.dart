@@ -19,34 +19,12 @@ class ItemDetailView extends StatelessWidget {
       viewModel: ItemDetailViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: new AppBar(
-            automaticallyImplyLeading: true,
-            leading: new Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: new Material(
-                    color: Colors.pink,
-                    shape: new CircleBorder(),
-                    child: Icon(Icons.arrow_back)),
-              ),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(children: <Widget>[
-                _buildImageGallery(receivedItem),
-                _buildProductCard(receivedItem),
-                _buildDescriptionPanel(receivedItem),
-                //_buildReviewsPanel(receivedItem),
-              ]),
-            ),
+          body: CustomScrollView(
+            slivers: <Widget>[
+              _buildAppBar(context, receivedItem),
+              _buildProductCard(receivedItem),
+              //_buildDescriptionPanel(receivedItem)
+            ],
           ),
           bottomNavigationBar:
               _buildBottomNavigationBar(context, model, receivedItem),
@@ -55,51 +33,83 @@ class ItemDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(Item item) {
-    return Column(
-      children: <Widget>[
-        Container(
-            padding: EdgeInsets.all(5),
-            decoration: new BoxDecoration(
-              border: new BorderDirectional(
-                  start: new BorderSide(color: Colors.pink, width: 5)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(item.itemName,
-                    overflow: TextOverflow.clip,
-                    maxLines: 2,
-                    style:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24)),
-              ],
-            )),
-        Container(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <
-                  Widget>[
-            DataTable(
-              headingRowHeight: 25,
-              dataRowHeight: 25,
-              columns: [
-                DataColumn(label: Center(child: Text('Hourly'))),
-                DataColumn(label: Center(child: Text('Daily'))),
-                DataColumn(label: Center(child: Text('Weekly'))),
-              ],
-              rows: [
-                DataRow(cells: [
-                  DataCell(
-                      Text("₱ " + item.rentingDetails['perHour'].toString())),
-                  DataCell(
-                      Text("₱ " + item.rentingDetails['perDay'].toString())),
-                  DataCell(
-                      Text("₱ " + item.rentingDetails['perWeek'].toString())),
-                ]),
-              ],
-            ),
-          ]),
+  Widget _buildAppBar(BuildContext context, Item item) {
+    return SliverAppBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      //elevation: 5.0,
+      //automaticallyImplyLeading: true,
+      leading: new Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: new Material(
+              color: Colors.pink,
+              shape: new CircleBorder(),
+              child: Icon(Icons.arrow_back)),
         ),
-      ],
+      ),
+      pinned: false,
+      floating: true,
+      expandedHeight: 300,
+      flexibleSpace: _buildImageGallery(item),
+    );
+  }
+
+  Widget _buildProductCard(Item item) {
+    return SliverFillRemaining(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: <Widget>[
+            Container(
+                padding: EdgeInsets.all(5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(item.itemName,
+                        overflow: TextOverflow.clip,
+                        maxLines: 2,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 24)),
+                  ],
+                )),
+            Container(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    DataTable(
+                      headingRowHeight: 25,
+                      dataRowHeight: 25,
+                      columns: [
+                        DataColumn(label: Center(child: Text('Hourly'))),
+                        DataColumn(label: Center(child: Text('Daily'))),
+                        DataColumn(label: Center(child: Text('Weekly'))),
+                      ],
+                      rows: [
+                        DataRow(cells: [
+                          item.rentingDetails['perHour'] != null
+                              ? DataCell(Text("₱ " +
+                                  item.rentingDetails['perHour'].toString()))
+                              : DataCell(Text("- - -")),
+                          item.rentingDetails['perDay'] != null
+                              ? DataCell(Text("₱ " +
+                                  item.rentingDetails['perDay'].toString()))
+                              : DataCell(Text("- - -")),
+                          item.rentingDetails['perWeek'] != null
+                              ? DataCell(Text("₱ " +
+                                  item.rentingDetails['perWeek'].toString()))
+                              : DataCell(Text("- - -")),
+                        ]),
+                      ],
+                    ),
+                  ]),
+            ),
+            _buildDescriptionPanel(item)
+          ],
+        ),
+      ),
     );
   }
 
@@ -134,7 +144,7 @@ class ItemDetailView extends StatelessWidget {
           ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            height: 250.0,
+            height: 800,
             child: TabBarView(
               //controller: tabController,
               children: <Widget>[
@@ -172,59 +182,29 @@ class ItemDetailView extends StatelessWidget {
     // );
   }
 
-  Widget _buildImages(Item item) {
-    final imageList = item.itemImages;
-    return Container(
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: ClipRect(
-          child: PhotoViewGallery.builder(
-            itemCount: imageList.length,
-            builder: (context, index) {
-              return PhotoViewGalleryPageOptions(
-                imageProvider: NetworkImage(
-                  imageList[index],
-                ),
-                // // Contained = the smallest possible size to fit one dimension of the screen
-                // minScale: PhotoViewComputedScale.contained * 0.8,
-                // // Covered = the smallest possible size to fit the whole screen
-                // maxScale: PhotoViewComputedScale.covered * 2,
-              );
-            },
-            scrollPhysics: BouncingScrollPhysics(),
-            // Set the background color to the "classic white"
-            backgroundDecoration: BoxDecoration(
-              color: Colors.white,
-            ),
-            loadingChild: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildImageGallery(Item item) {
     final imageList = item.itemImages;
-    return Container(
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: PhotoViewGallery.builder(
-          scrollPhysics: const BouncingScrollPhysics(),
-          builder: (BuildContext context, int index) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider: NetworkImage(
-                imageList[index],
-              ),
-              initialScale: PhotoViewComputedScale.contained * 0.8,
-              //heroAttributes: HeroAttributes(tag: imageList[index].id),
-            );
-          },
-          itemCount: imageList.length,
-          loadingChild: Center(
-            child: CircularProgressIndicator(),
-          ),
+    return SizedBox(
+      height: 300,
+      child: PhotoViewGallery.builder(
+        gaplessPlayback: true,
+        reverse: true,
+        pageController: new PageController(),
+        //scrollPhysics: const BouncingScrollPhysics(),
+        builder: (BuildContext context, int index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: NetworkImage(
+              imageList[index],
+            ),
+            // minScale: PhotoViewComputedScale.contained * 0.8,
+            // maxScale: PhotoViewComputedScale.covered * 1.1,
+            initialScale: PhotoViewComputedScale.covered * 0.6,
+            //heroAttributes: HeroAttributes(tag: imageList[index].id),
+          );
+        },
+        itemCount: imageList.length,
+        loadingChild: Center(
+          child: CircularProgressIndicator(),
         ),
       ),
     );

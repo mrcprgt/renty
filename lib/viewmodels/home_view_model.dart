@@ -43,6 +43,26 @@ class HomeViewModel extends BaseModel {
     });
   }
 
+  List<String> getAllItemNames() {
+    List<String> itemNamesList = [];
+    for (var e in items) {
+      itemNamesList.add(e.itemName.toLowerCase());
+    }
+    return itemNamesList;
+  }
+
+  Future searchOptions(String pattern) async {
+    var allItemsList = getAllItemNames();
+    List<dynamic> suggestionsList = [];
+    pattern = pattern.toLowerCase();
+    for (var i in allItemsList) {
+      if (i.contains(pattern)){
+        suggestionsList.add(i);
+      }
+    }
+    return suggestionsList;
+  }
+
   Future fetchOperations() async {
     //TODO: FIX CATEGORIES ASAP
     try {

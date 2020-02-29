@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/ui/widgets/item_listing_tile.dart';
-
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:renty_crud_version/viewmodels/home_view_model.dart';
 
 class HomeView extends StatelessWidget {
@@ -24,9 +23,9 @@ class HomeView extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: CustomScrollView(
                       slivers: <Widget>[
-                        _buildAppBar(context),
+                        _buildAppBar(context, model),
                         _buildSliverHeader(),
-                        _buildCategoriesBar(context, model),
+                        //_buildCategoriesBar(context, model),
                         _buildGridView(context, model),
                       ],
                     ),
@@ -37,6 +36,7 @@ class HomeView extends StatelessWidget {
                     ),
                   ),
             floatingActionButton: FloatingActionButton(
+              backgroundColor: Colors.pink,
               child: Icon(Icons.add),
               onPressed: () => model.goToItemLendPage(),
             ),
@@ -110,42 +110,80 @@ class HomeView extends StatelessWidget {
     ));
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, HomeViewModel model) {
     return SliverAppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 5.0,
       automaticallyImplyLeading: false,
       pinned: false,
       floating: true,
-      title: new TextField(
-        //focusNode: _searchFocusNode,
-        //style: Theme.of(context).primaryTextTheme.title,
-        decoration: InputDecoration(
-          // border: OutlineInputBorder(
-          //     borderRadius:
-          //         BorderRadius.all(Radius.circular(1.0))),
-          suffixIcon: Icon(Icons.search),
-          hintText: 'What do you want to borrow?',
-        ),
-      ),
+      title: _buildSearchField(context, model),
+    );
+  }
+
+  Widget _buildSearchField(BuildContext context, HomeViewModel model) {
+    return new TypeAheadField(
+      textFieldConfiguration: TextFieldConfiguration(
+          autofocus: true,
+          style: TextStyle(),
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.search),
+          )),
+      suggestionsCallback: (pattern) async {
+        return await model.searchOptions(pattern);
+      },
+      itemBuilder: (context, suggestion) {
+        return ListTile(
+          //leading: Icon(Icons.shopping_cart),
+          title: Text(suggestion),
+          //subtitle: Text('\$${suggestion['price']}'),
+        );
+      },
+      onSuggestionSelected: (suggestion) {
+        model.goToItemDetailPage(model.items[suggestion]);
+      },
     );
   }
 
   Widget _buildGridView(BuildContext context, HomeViewModel model) {
-    return new SliverStaggeredGrid.countBuilder(
-      crossAxisCount: 4,
-      itemCount: model.items.length,
-      itemBuilder: ((BuildContext context, index) => GestureDetector(
-            onTap: () => model.goToItemDetailPage(model.items[index]),
-            child: ItemTile(
-              item: model.items[index],
-              onPressed: () => model.goToItemDetailPage(model.items[index]),
-            ),
-          )),
-      staggeredTileBuilder: (int index) =>
-          new StaggeredTile.count(2, index.isEven ? 2 : 2),
-      mainAxisSpacing: 8.0,
-      crossAxisSpacing: 8.0,
+    // return new SliverStaggeredGrid.countBuilder(
+    //   crossAxisCount: 4,
+    //   itemCount: model.items.length,
+    //   itemBuilder: ((BuildContext context, index) => GestureDetector(
+    //         onTap: () => model.goToItemDetailPage(model.items[index]),
+    //         child: ItemTile(
+    //           item: model.items[index],
+    //           onPressed: () => model.goToItemDetailPage(model.items[index]),
+    //         ),
+    //       )),
+    //   staggeredTileBuilder: (int index) =>
+    //       new StaggeredTile.fit(2),
+    //       // new StaggeredTile.extent(2, 2),
+    //   mainAxisSpacing: 8.0,
+    //   crossAxisSpacing: 8.0,
+    // );
+
+    return new SliverGrid(
+      // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      //   crossAxisCount: 2,
+      // ),
+
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          childAspectRatio: 0.65, crossAxisCount: 2),
+
+      ///Lazy building of list
+      delegate: SliverChildBuilderDelegate(
+        ((BuildContext context, index) => GestureDetector(
+              onTap: () => model.goToItemDetailPage(model.items[index]),
+              child: ItemTile(
+                item: model.items[index],
+                onPressed: () => model.goToItemDetailPage(model.items[index]),
+              ),
+            )),
+
+        /// Set childCount to limit no.of items
+        childCount: model.items.length,
+      ),
     );
   }
 
