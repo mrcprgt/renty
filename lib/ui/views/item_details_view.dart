@@ -19,10 +19,11 @@ class ItemDetailView extends StatelessWidget {
       viewModel: ItemDetailViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
           body: CustomScrollView(
             slivers: <Widget>[
               _buildAppBar(context, receivedItem),
-              _buildProductCard(receivedItem),
+              _buildProductCard(receivedItem, context),
               //_buildDescriptionPanel(receivedItem)
             ],
           ),
@@ -57,7 +58,7 @@ class ItemDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(Item item) {
+  Widget _buildProductCard(Item item, BuildContext context) {
     return SliverFillRemaining(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -106,14 +107,14 @@ class ItemDetailView extends StatelessWidget {
                     ),
                   ]),
             ),
-            _buildDescriptionPanel(item)
+            _buildDescriptionPanel(item, context)
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDescriptionPanel(Item item) {
+  Widget _buildDescriptionPanel(Item item, BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -142,9 +143,12 @@ class ItemDetailView extends StatelessWidget {
               ),
             ],
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            height: 800,
+          ConstrainedBox(
+            //padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            //height: MediaQuery.of(context).size.height,
+            constraints: (BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height,
+                maxWidth: MediaQuery.of(context).size.width)),
             child: TabBarView(
               //controller: tabController,
               children: <Widget>[
@@ -237,7 +241,7 @@ class ItemDetailView extends StatelessWidget {
                       width: 4.0,
                     ),
                     Text(
-                      "Wish",
+                      "Add to List",
                       style: TextStyle(color: Colors.white),
                     ),
                   ],

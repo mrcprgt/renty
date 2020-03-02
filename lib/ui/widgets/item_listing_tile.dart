@@ -27,7 +27,7 @@ class ItemTile extends StatelessWidget {
                       fit: BoxFit.fill,
                       imageUrl: item.itemImages[0],
                       placeholder: (context, url) =>
-                          new CircularProgressIndicator(),
+                          new Center(child: CircularProgressIndicator(),),
                       errorWidget: (context, url, error) =>
                           new Icon(Icons.error),
                     )
