@@ -5,11 +5,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:renty_crud_version/locator.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/models/operations.dart';
 import 'package:renty_crud_version/models/user.dart';
-import 'package:renty_crud_version/services/push_notification_service.dart';
 
 class FirestoreService {
   final CollectionReference _usersCollectionReference =
@@ -60,6 +58,8 @@ class FirestoreService {
             .where((mappedItem) =>
                 mappedItem.itemName != null && mappedItem.isApproved)
             .toList();
+
+        //TODO: Sort by date.
 
         // Add the posts onto the controller
         _itemListingController.add(items);
@@ -116,7 +116,7 @@ class FirestoreService {
       var owner,
       DateTime submissionDate,
       List<Asset> asset) async {
-        var lenderToken = await _fcm.getToken();
+    var lenderToken = await _fcm.getToken();
     DocumentReference docRef = await _itemListingsCollectionReference.add({
       'item_name': formItemName,
       'item_description': formItemDescription,

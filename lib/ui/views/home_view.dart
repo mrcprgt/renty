@@ -151,30 +151,9 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildGridView(BuildContext context, HomeViewModel model) {
-    // return new SliverStaggeredGrid.countBuilder(
-    //   crossAxisCount: 4,
-    //   itemCount: model.items.length,
-    //   itemBuilder: ((BuildContext context, index) => GestureDetector(
-    //         onTap: () => model.goToItemDetailPage(model.items[index]),
-    //         child: ItemTile(
-    //           item: model.items[index],
-    //           onPressed: () => model.goToItemDetailPage(model.items[index]),
-    //         ),
-    //       )),
-    //   staggeredTileBuilder: (int index) =>
-    //       new StaggeredTile.fit(2),
-    //       // new StaggeredTile.extent(2, 2),
-    //   mainAxisSpacing: 8.0,
-    //   crossAxisSpacing: 8.0,
-    // );
-
     return new SliverGrid(
-      // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      //   crossAxisCount: 2,
-      // ),
-
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: 0.65, crossAxisCount: 2),
+          childAspectRatio: 0.75, crossAxisCount: 2),
 
       ///Lazy building of list
       delegate: SliverChildBuilderDelegate(

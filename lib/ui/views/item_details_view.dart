@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:photo_view/photo_view.dart';
-
 import 'package:photo_view/photo_view_gallery.dart';
 
-class ItemDetailView extends StatelessWidget {
+class ItemDetailView extends StatefulWidget {
   const ItemDetailView(
       {Key key, this.receivedItem, this.photo, this.heroAttributes})
       : super(key: key);
   final Item receivedItem;
   final PhotoViewHeroAttributes heroAttributes;
   final String photo;
+
+  @override
+  _ItemDetailViewState createState() => _ItemDetailViewState();
+}
+
+class _ItemDetailViewState extends State<ItemDetailView> {
+  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  bool hourlyChip = false, dailyChip = false, weeklyChip = false;
+  static DateTime currentDay = DateTime.now();
+  DateTime maxDate =
+      new DateTime(currentDay.year, currentDay.month, currentDay.day + 5);
+  DateTime maxWeek =
+      new DateTime(currentDay.year, currentDay.month, currentDay.day + 14);
+
   @override
   Widget build(BuildContext context) {
     return ViewModelProvider<ItemDetailViewModel>.withConsumer(
@@ -22,13 +37,13 @@ class ItemDetailView extends StatelessWidget {
           resizeToAvoidBottomInset: true,
           body: CustomScrollView(
             slivers: <Widget>[
-              _buildAppBar(context, receivedItem),
-              _buildProductCard(receivedItem, context),
+              _buildAppBar(context, widget.receivedItem),
+              _buildProductCard(widget.receivedItem, context),
               //_buildDescriptionPanel(receivedItem)
             ],
           ),
           bottomNavigationBar:
-              _buildBottomNavigationBar(context, model, receivedItem),
+              _buildBottomNavigationBar(context, model, widget.receivedItem),
         ),
       ),
     );
@@ -172,18 +187,6 @@ class ItemDetailView extends StatelessWidget {
         ],
       ),
     );
-
-    // return Container(
-    //   alignment: Alignment.topLeft,
-    //   padding: EdgeInsets.all(5),
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: <Widget>[
-    //       Text('Description', style: new TextStyle(fontSize: 20)),
-    //       Text(item.itemDescription),
-    //     ],
-    //   ),
-    // );
   }
 
   Widget _buildImageGallery(Item item) {
@@ -253,7 +256,7 @@ class ItemDetailView extends StatelessWidget {
             flex: 2,
             child: RaisedButton(
               onPressed: () {
-                model.goToTransactionView(item);
+                showRentingDetails(item, context);
               },
               color: Colors.pinkAccent,
               child: Center(
@@ -280,4 +283,133 @@ class ItemDetailView extends StatelessWidget {
       ),
     );
   }
+
+  showRentingDetails(Item item, BuildContext context) => showModalBottomSheet(
+      elevation: 4,
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              padding: new EdgeInsets.all(32),
+              child: Column(
+                  //crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text('Rent Rate'),
+                    Row(
+                      children: <Widget>[
+                        FormBuilder(
+                          // key: _fbKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  item.rentingDetails['perHour'] != null
+                                      ? ChoiceChip(
+                                          label: Text("Hourly"),
+                                          selected: hourlyChip,
+                                          onSelected: (bool _hourlyChip) {
+                                            setState(() {
+                                              hourlyChip = _hourlyChip;
+                                            });
+                                          },
+                                        )
+                                      : Container(),
+                                  SizedBox(width: 10),
+                                  item.rentingDetails['perDay'] != null
+                                      ? ChoiceChip(
+                                          label: Text("Daily"),
+                                          selected: dailyChip,
+                                          onSelected: (bool _dailyChip) {
+                                            setState(() {
+                                              dailyChip = _dailyChip;
+                                            });
+                                          },
+                                        )
+                                      : Container(),
+                                  SizedBox(width: 10),
+                                  item.rentingDetails['perWeek'] != null
+                                      ? ChoiceChip(
+                                          label: Text("Weekly"),
+                                          selected: weeklyChip,
+                                          onSelected: (bool _weeklyChip) {
+                                            setState(() {
+                                              weeklyChip = _weeklyChip;
+                                            });
+                                          },
+                                        )
+                                      : Container(),
+                                  SizedBox(width: 10),
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  hourlyChip == true
+                                      ? FormBuilderTextField(
+                                          attribute: "hours_rented",
+                                          // decoration: InputDecoration(
+                                          //     hintText:
+                                          //         "How many hours will you borrow it?",
+                                          //     border: OutlineInputBorder(
+                                          //         borderSide: BorderSide.none)),
+                                        )
+                                      : Container(
+                                          child: Text("DOGG"),
+                                        ),
+                                  dailyChip
+                                      ? Container(
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.pink),
+                                              borderRadius:
+                                                  BorderRadius.circular(4)),
+                                          child: FormBuilderDateRangePicker(
+                                              attribute: "range_of_days",
+                                              firstDate: currentDay,
+                                              lastDate: maxDate,
+                                              format: DateFormat(
+                                                "yyyy-MM-dd",
+                                              ),
+                                              decoration: InputDecoration(
+                                                  border: OutlineInputBorder(
+                                                      borderSide:
+                                                          BorderSide.none),
+                                                  hintText:
+                                                      "How many days will you borrow it?")),
+                                        )
+                                      : Container(),
+                                  weeklyChip
+                                      ? Container(
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.pink),
+                                              borderRadius:
+                                                  BorderRadius.circular(4)),
+                                          child: FormBuilderDateRangePicker(
+                                            attribute: "range_of_week",
+                                            firstDate: currentDay,
+                                            lastDate: maxWeek,
+                                            format: DateFormat(
+                                              "yyyy-MM-dd",
+                                            ),
+                                            decoration: InputDecoration(
+                                                hintText:
+                                                    "How many weeks will you borrow it?"),
+                                          ),
+                                        )
+                                      : Container(),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    )
+                  ]),
+            );
+          },
+        );
+      });
 }
