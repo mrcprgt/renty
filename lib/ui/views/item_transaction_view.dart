@@ -76,7 +76,7 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
               style: new TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             //_buildImages(item),
-            _buildExpansionTile(item),
+            //_buildExpansionTile(item),
             _buildProcedures(item),
             SizedBox(
               height: 20,
@@ -130,15 +130,16 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
   Widget _buildProcedures(Item item) {
     List<FormBuilderFieldOption> radioOptions = [];
     if (item.rentingDetails['perHour'] != null) {
-      radioOptions.add(FormBuilderFieldOption(
-        value: "Hourly",
-      ));
+      radioOptions
+          .add(FormBuilderFieldOption(value: "Hourly", child: Text("Hourly")));
     }
     if (item.rentingDetails['perDay'] != null) {
-      radioOptions.add(FormBuilderFieldOption(value: "Daily"));
+      radioOptions
+          .add(FormBuilderFieldOption(value: "Daily", child: Text("Daily")));
     }
     if (item.rentingDetails['perWeek'] != null) {
-      radioOptions.add(FormBuilderFieldOption(value: "Weekly"));
+      radioOptions
+          .add(FormBuilderFieldOption(value: "Weekly", child: Text("Weekly")));
     }
     return Column(
       children: <Widget>[
@@ -151,40 +152,45 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
             style: TextStyle(fontSize: 24),
           ),
         ),
-        FormBuilderRadio(
-            initialValue: "null",
-            attribute: "rent_type",
-            options: radioOptions,
-            activeColor: Colors.pink,
-            onChanged: (val) {
-              //_fbKey.currentState.fields['rent_type'].currentState.validate();
-              if (_fbKey.currentState.fields["rent_type"].currentState.value ==
-                  "Hourly") {
-                setState(() {
-                  hourlyRadio = !hourlyRadio;
-                  dailyRadio = false;
-                  weeklyRadio = false;
-                });
-              }
-              if (_fbKey.currentState.fields["rent_type"].currentState.value ==
-                  "Daily") {
-                setState(() {
-                  dailyRadio = !dailyRadio;
-                  hourlyRadio = false;
-                  weeklyRadio = false;
-                });
-              }
-              if (_fbKey.currentState.fields["rent_type"].currentState.value ==
-                  "Weekly") {
-                setState(() {
-                  weeklyRadio = !weeklyRadio;
-                  dailyRadio = false;
-                  hourlyRadio = false;
-                });
-              }
-            },
-            decoration: InputDecoration(
-                border: OutlineInputBorder(borderSide: BorderSide.none))),
+        FormBuilderChoiceChip(
+          attribute: "rent_type",
+          options: radioOptions,
+          selectedColor: Colors.pink,
+          onChanged: (val) {
+            //_fbKey.currentState.fields['rent_type'].currentState.validate();
+            if (_fbKey.currentState.fields["rent_type"].currentState.value ==
+                "Hourly") {
+              setState(() {
+                hourlyRadio = !hourlyRadio;
+                dailyRadio = false;
+                weeklyRadio = false;
+              });
+            }
+            if (_fbKey.currentState.fields["rent_type"].currentState.value ==
+                "Daily") {
+              setState(() {
+                dailyRadio = !dailyRadio;
+                hourlyRadio = false;
+                weeklyRadio = false;
+              });
+            }
+            if (_fbKey.currentState.fields["rent_type"].currentState.value ==
+                "Weekly") {
+              setState(() {
+                weeklyRadio = !weeklyRadio;
+                dailyRadio = false;
+                hourlyRadio = false;
+              });
+            }
+          },
+        ),
+        // FormBuilderRadio(
+        //     initialValue: "null",
+        //     attribute: "rent_type",
+        //     options: radioOptions,
+        //     activeColor: Colors.pink,
+        //     decoration: InputDecoration(
+        //         border: OutlineInputBorder(borderSide: BorderSide.none))),
       ],
     );
   }
@@ -202,13 +208,18 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.pink),
                     borderRadius: BorderRadius.circular(4)),
-                child: FormBuilderTextField(
+                child: FormBuilderDateTimePicker(
                   attribute: "hours_rented",
-                  decoration: InputDecoration(
-                      hintText: "How many hours will you borrow it?",
-                      border: OutlineInputBorder(borderSide: BorderSide.none)),
-                ),
-              )
+                  inputType: InputType.time,
+                  initialTime: TimeOfDay.now(),
+                )
+                // child: FormBuilderTextField(
+                //   attribute: "hours_rented",
+                //   decoration: InputDecoration(
+                //       hintText: "How many hours will you borrow it?",
+                //       border: OutlineInputBorder(borderSide: BorderSide.none)),
+                // ),
+                )
             : Container(),
         dailyRadio
             ? Container(
@@ -217,8 +228,13 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
                     borderRadius: BorderRadius.circular(4)),
                 child: FormBuilderDateRangePicker(
                     attribute: "range_of_days",
+                    initialFirstDate: new DateTime.now(),
+                    initialLastDate:
+                        (new DateTime.now()).add(new Duration(days: 7)),
                     firstDate: currentDay,
                     lastDate: maxDate,
+                    onEditingComplete: ,
+                    // selectableDayPredicate: ,
                     format: DateFormat(
                       "yyyy-MM-dd",
                     ),
@@ -247,4 +263,12 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
       ],
     );
   }
+
+  showTransactiondetails(Item item, BuildContext context) => {
+        Container(
+          child: Column(
+            children: <Widget>[],
+          ),
+        )
+      };
 }

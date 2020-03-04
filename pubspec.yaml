@@ -23,7 +23,7 @@ dependencies:
 
   photo_view: ^0.9.1
   expandable: ^4.1.2
-  flutter_form_builder: ^3.7.3
+  flutter_form_builder: ^3.8.0+1
   permission_handler: "^4.2.0+hotfix.3"
   cached_network_image: ^2.0.0
   firebase_messaging: ^6.0.9

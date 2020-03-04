@@ -257,6 +257,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
             child: RaisedButton(
               onPressed: () {
                 showRentingDetails(item, context);
+                // model.goToTransactionView(item);
               },
               color: Colors.pinkAccent,
               child: Center(
@@ -285,131 +286,164 @@ class _ItemDetailViewState extends State<ItemDetailView> {
   }
 
   showRentingDetails(Item item, BuildContext context) => showModalBottomSheet(
-      elevation: 4,
+      isScrollControlled: true,
+      elevation: 1,
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (context, StateSetter setState) {
             return Container(
+              //alignment: Alignment(0.0, 0.0),
+              height: 500,
+              // width: MediaQuery.of(context).size.width,
               padding: new EdgeInsets.all(32),
               child: Column(
-                  //crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('Rent Rate'),
-                    Row(
-                      children: <Widget>[
-                        FormBuilder(
-                          // key: _fbKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  item.rentingDetails['perHour'] != null
-                                      ? ChoiceChip(
-                                          label: Text("Hourly"),
-                                          selected: hourlyChip,
-                                          onSelected: (bool _hourlyChip) {
-                                            setState(() {
-                                              hourlyChip = _hourlyChip;
-                                            });
-                                          },
-                                        )
-                                      : Container(),
-                                  SizedBox(width: 10),
-                                  item.rentingDetails['perDay'] != null
-                                      ? ChoiceChip(
-                                          label: Text("Daily"),
-                                          selected: dailyChip,
-                                          onSelected: (bool _dailyChip) {
-                                            setState(() {
-                                              dailyChip = _dailyChip;
-                                            });
-                                          },
-                                        )
-                                      : Container(),
-                                  SizedBox(width: 10),
-                                  item.rentingDetails['perWeek'] != null
-                                      ? ChoiceChip(
-                                          label: Text("Weekly"),
-                                          selected: weeklyChip,
-                                          onSelected: (bool _weeklyChip) {
-                                            setState(() {
-                                              weeklyChip = _weeklyChip;
-                                            });
-                                          },
-                                        )
-                                      : Container(),
-                                  SizedBox(width: 10),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  hourlyChip == true
-                                      ? FormBuilderTextField(
-                                          attribute: "hours_rented",
-                                          // decoration: InputDecoration(
-                                          //     hintText:
-                                          //         "How many hours will you borrow it?",
-                                          //     border: OutlineInputBorder(
-                                          //         borderSide: BorderSide.none)),
-                                        )
-                                      : Container(
-                                          child: Text("DOGG"),
-                                        ),
-                                  dailyChip
-                                      ? Container(
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.pink),
-                                              borderRadius:
-                                                  BorderRadius.circular(4)),
-                                          child: FormBuilderDateRangePicker(
-                                              attribute: "range_of_days",
-                                              firstDate: currentDay,
-                                              lastDate: maxDate,
-                                              format: DateFormat(
-                                                "yyyy-MM-dd",
-                                              ),
-                                              decoration: InputDecoration(
-                                                  border: OutlineInputBorder(
-                                                      borderSide:
-                                                          BorderSide.none),
-                                                  hintText:
-                                                      "How many days will you borrow it?")),
-                                        )
-                                      : Container(),
-                                  weeklyChip
-                                      ? Container(
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.pink),
-                                              borderRadius:
-                                                  BorderRadius.circular(4)),
-                                          child: FormBuilderDateRangePicker(
-                                            attribute: "range_of_week",
-                                            firstDate: currentDay,
-                                            lastDate: maxWeek,
-                                            format: DateFormat(
-                                              "yyyy-MM-dd",
-                                            ),
-                                            decoration: InputDecoration(
-                                                hintText:
-                                                    "How many weeks will you borrow it?"),
-                                          ),
-                                        )
-                                      : Container(),
-                                ],
-                              ),
-                            ],
+                    Text(
+                      'Rent Rates Available',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    FormBuilder(
+                      // key: _fbKey,
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          buildChoiceChips(item, setState),
+                          Divider(
+                            color: Colors.pink,
+                            thickness: 2,
                           ),
-                        )
-                      ],
+                          buildRentingInput(context),
+                        ],
+                      ),
                     )
                   ]),
             );
           },
         );
       });
+
+  Column buildRentingInput(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        hourlyChip == true
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Container(
+                      width: MediaQuery.of(context).size.width / 2 - 32,
+                      child: FormBuilderDateTimePicker(
+                        attribute: "start_time",
+                        inputType: InputType.time,
+                        initialTime: TimeOfDay.now(),
+                      )),
+                  Container(
+                      width: MediaQuery.of(context).size.width / 2 - 32,
+                      child: FormBuilderDateTimePicker(
+                        attribute: "end_time",
+                        inputType: InputType.time,
+                        initialTime: TimeOfDay.now(),
+                      )),
+                ],
+              )
+            : Container(),
+        dailyChip
+            ? SizedBox(
+                height: 200,
+                child: FormBuilderDateRangePicker(
+                  attribute: "range_of_days",
+                  firstDate: currentDay,
+                  lastDate: maxDate,
+                  format: DateFormat(
+                    "yyyy-MM-dd",
+                  ),
+                ),
+              )
+            : Container(),
+        weeklyChip
+            ? FormBuilderDateRangePicker(
+                attribute: "range_of_week",
+                firstDate: currentDay,
+                lastDate: maxWeek,
+                format: DateFormat(
+                  "yyyy-MM-dd",
+                ),
+                // decoration: InputDecoration(
+                //     hintText:
+                //         "How many weeks will you borrow it?"),
+              )
+            : Container(),
+      ],
+    );
+  }
+
+  Container buildChoiceChips(Item item, StateSetter setState) {
+    return Container(
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          item.rentingDetails['perHour'] != null
+              ? ChoiceChip(
+                  label: Text(
+                    "Php " +
+                        item.rentingDetails['perHour'].toString() +
+                        " / hour",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  selected: hourlyChip,
+                  onSelected: (bool _hourlyChip) {
+                    setState(() {
+                      hourlyChip = _hourlyChip;
+                      dailyChip = false;
+                      weeklyChip = false;
+                    });
+                  },
+                )
+              : Container(),
+          SizedBox(width: 10),
+          item.rentingDetails['perDay'] != null
+              ? ChoiceChip(
+                  label: Text(
+                    "Php " +
+                        item.rentingDetails['perDay'].toString() +
+                        " / day",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  selected: dailyChip,
+                  onSelected: (bool _dailyChip) {
+                    setState(() {
+                      dailyChip = _dailyChip;
+                      hourlyChip = false;
+                      weeklyChip = false;
+                    });
+                  },
+                )
+              : Container(),
+          SizedBox(width: 10),
+          item.rentingDetails['perWeek'] != null
+              ? ChoiceChip(
+                  label: Text(
+                    "Php " +
+                        item.rentingDetails['perWeek'].toString() +
+                        " / week",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  selected: weeklyChip,
+                  onSelected: (bool _weeklyChip) {
+                    setState(() {
+                      weeklyChip = _weeklyChip;
+                      dailyChip = false;
+                      hourlyChip = false;
+                    });
+                  },
+                )
+              : Container(),
+          SizedBox(width: 10),
+        ],
+      ),
+    );
+  }
 }
