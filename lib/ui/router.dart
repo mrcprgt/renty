@@ -34,10 +34,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       var receivedItem = settings.arguments as Item;
       return MaterialPageRoute(
           builder: (_) => ItemDetailView(receivedItem: receivedItem));
+
     case ItemTransactionViewRoute:
-      var receivedItem = settings.arguments as Item;
-      return MaterialPageRoute(
-          builder: (_) => ItemTransactionView(receivedItem: receivedItem));
+      // var receivedItem = settings.arguments;
+      // var rentChosen = settings.arguments;
+      // var startTime = settings.arguments;
+      // var endTime = settings.arguments;
+      // var startDate = settings.arguments;
+      // var endDate = settings.arguments;
+
+      return MaterialPageRoute(builder: (_) => ItemTransactionView());
+
     default:
       return MaterialPageRoute(
           builder: (_) => Scaffold(
