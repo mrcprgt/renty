@@ -43,7 +43,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       // var startDate = settings.arguments;
       // var endDate = settings.arguments;
 
-      return MaterialPageRoute(builder: (_) => ItemTransactionView());
+      var receivedArguments = settings.arguments;
+
+      return MaterialPageRoute(
+          builder: (_) =>
+              ItemTransactionView(receivedArguments: receivedArguments));
 
     default:
       return MaterialPageRoute(

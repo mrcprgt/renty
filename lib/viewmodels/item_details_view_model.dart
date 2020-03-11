@@ -39,6 +39,8 @@ class ItemDetailViewModel extends BaseModel {
       startTime: receivedStartTime,
       endTime: receivedEndTime,
     );
+
+    print(transacArgu.rentChosen);
     _navigationService.navigateTo(ItemTransactionViewRoute,
         arguments: transacArgu);
   }
