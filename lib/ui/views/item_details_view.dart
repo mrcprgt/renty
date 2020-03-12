@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -560,16 +562,16 @@ class _ItemDetailViewState extends State<ItemDetailView> {
         break;
       default:
     }
-    var url =
-        'https:/us-central1-server-compute.cloudfunctions.net/serverCompute?';
+
+    var url = 'https://us-central1-server-compute.cloudfunctions.net/serverCompute?';
 
     var response =
         await http.post(url, body: {'dailyRate': rate.toString(), 'day': duration.toString()});
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 
-    // print(await http.read(
-    //     'https:/us-central1-server-compute.cloudfunctions.net/serverCompute?dailyrate=$rate&day=$duration'));
+     print(await http.read(
+       'https://us-central1-server-compute.cloudfunctions.net/serverCompute?dailyRate=$rate&day=$duration'));
   }
 
   int _calculateRentingDuration(var rentChosen) {
