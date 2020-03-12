@@ -104,9 +104,19 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
   int _calculateRentingDuration(TransactionArguments transactionArguments) {
     startDate = transactionArguments.startDate;
     endDate = transactionArguments.endDate;
-
-    rentingDuration = endDate.difference(startDate);
-    return rentingDuration.inDays;
+    switch (transactionArguments.rentChosen) {
+      case "Hourly":
+        rentingDuration = transactionArguments.endTime.difference(transactionArguments.startTime);
+        return rentingDuration.inHours;
+        break;
+      case "Daily":
+        rentingDuration = endDate.difference(startDate);
+        return rentingDuration.inDays;
+        break;
+      case "Weekly":
+        break;
+      default:
+    }
   }
 
   double checkRentChosen(TransactionArguments transactionArguments) {
@@ -140,10 +150,10 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
 
   calculateTotal(TransactionArguments transactionArguments) {
     double serviceFeePayable = calculateServiceFee(transactionArguments);
-    print(_calculateRentingDuration(transactionArguments).toString() +
-        " * " +
+    print("Renting Duration: "+ _calculateRentingDuration(transactionArguments).toString() +
+        " * Rent Chosen: " +
         checkRentChosen(transactionArguments).toString() +
-        "service fee payable " +
+        " Service Fee Payable:  " +
         serviceFeePayable.toString());
     double totalPayable = (_calculateRentingDuration(transactionArguments) *
             checkRentChosen(transactionArguments)) +
@@ -206,14 +216,17 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
                       Text(
                         transactionArguments.rentChosen == "Daily"
                             ? transactionArguments.item.rentingDetails["perDay"]
-                                .toString()
+                                    .toString() +
+                                " /day"
                             : transactionArguments.rentChosen == "Hourly"
                                 ? transactionArguments
-                                    .item.rentingDetails["perHour"]
-                                    .toString()
+                                        .item.rentingDetails["perHour"]
+                                        .toString() +
+                                    " /hour"
                                 : transactionArguments
-                                    .item.rentingDetails["perWeek"]
-                                    .toString(),
+                                        .item.rentingDetails["perWeek"]
+                                        .toString() +
+                                    " /week",
                         style: TextStyle(fontSize: 18),
                       ),
                       Text(

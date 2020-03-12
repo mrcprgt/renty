@@ -364,9 +364,9 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                       onChanged: (val) {
                         endTime = new DateTime(val.hour, val.minute);
                         endDate = new DateTime(
-                          startTime.year,
-                          startTime.month,
-                          startTime.day,
+                          startDate.year,
+                          startDate.month,
+                          startDate.day,
                         );
                       },
                       inputType: InputType.time,
