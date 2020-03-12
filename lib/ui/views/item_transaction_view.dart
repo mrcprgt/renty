@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
-import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:renty_crud_version/viewmodels/item_transaction_view_model.dart';
+import 'package:http/http.dart' as http;
 
 class ItemTransactionView extends StatefulWidget {
   ItemTransactionView({
@@ -106,7 +105,8 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
     endDate = transactionArguments.endDate;
     switch (transactionArguments.rentChosen) {
       case "Hourly":
-        rentingDuration = transactionArguments.endTime.difference(transactionArguments.startTime);
+        rentingDuration = transactionArguments.endTime
+            .difference(transactionArguments.startTime);
         return rentingDuration.inHours;
         break;
       case "Daily":
@@ -144,21 +144,22 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
     double serviceFee =
         (rentDuration * checkRentChosen(transactionArguments)) * 0.25;
 
-    print(serviceFee.runtimeType);
+    // print(serviceFee.runtimeType);
     return serviceFee;
   }
 
   calculateTotal(TransactionArguments transactionArguments) {
     double serviceFeePayable = calculateServiceFee(transactionArguments);
-    print("Renting Duration: "+ _calculateRentingDuration(transactionArguments).toString() +
-        " * Rent Chosen: " +
-        checkRentChosen(transactionArguments).toString() +
-        " Service Fee Payable:  " +
-        serviceFeePayable.toString());
+    // print("Renting Duration: " +
+    //     _calculateRentingDuration(transactionArguments).toString() +
+    //     " * Rent Chosen: " +
+    //     checkRentChosen(transactionArguments).toString() +
+    //     " Service Fee Payable:  " +
+    //     serviceFeePayable.toString());
     double totalPayable = (_calculateRentingDuration(transactionArguments) *
             checkRentChosen(transactionArguments)) +
         serviceFeePayable;
-    print(totalPayable.toString());
+    // print(totalPayable.toString());
     return totalPayable;
   }
 
@@ -251,5 +252,7 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
           ),
         ),
       );
+
+  
   //EOF
 }

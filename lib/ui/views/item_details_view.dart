@@ -6,6 +6,7 @@ import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:http/http.dart' as http;
 
 class ItemDetailView extends StatefulWidget {
   const ItemDetailView(
@@ -29,6 +30,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
       new DateTime(currentDay.year, currentDay.month, currentDay.day + 14);
 
   var startTime, endTime, startDate, endDate, rentChosen;
+  var rentingDuration;
 
   @override
   Widget build(BuildContext context) {
@@ -541,11 +543,50 @@ class _ItemDetailViewState extends State<ItemDetailView> {
             if (weeklyChip) {
               rentChosen = "Weekly";
             }
-
+            useCloudCalculate(item);
             model.goToTransactionView(
                 item, rentChosen, startTime, endTime, startDate, endDate);
           },
           //onPressed: () => model.goToTransactionView(item),
         )),
       );
+
+  Future useCloudCalculate(Item item) async {
+    int duration = _calculateRentingDuration(rentChosen);
+    int rate;
+    switch (rentChosen) {
+      case "Daily":
+        rate = int.parse(item.rentingDetails['perHour']);
+        break;
+      default:
+    }
+    var url =
+        'https:/us-central1-server-compute.cloudfunctions.net/serverCompute?';
+
+    var response =
+        await http.post(url, body: {'dailyRate': rate.toString(), 'day': duration.toString()});
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    // print(await http.read(
+    //     'https:/us-central1-server-compute.cloudfunctions.net/serverCompute?dailyrate=$rate&day=$duration'));
+  }
+
+  int _calculateRentingDuration(var rentChosen) {
+    startDate = startDate;
+    endDate = endDate;
+    switch (rentChosen) {
+      case "Hourly":
+        rentingDuration = endTime.difference(startTime);
+        return rentingDuration.inHours;
+        break;
+      case "Daily":
+        rentingDuration = endDate.difference(startDate);
+        return rentingDuration.inDays;
+        break;
+      case "Weekly":
+        break;
+      default:
+    }
+  }
 }
