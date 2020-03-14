@@ -6,38 +6,32 @@ import 'package:renty_crud_version/viewmodels/base_model.dart';
 import '../locator.dart';
 
 class TransactionArguments {
-  var item;
+  Item item;
   var rentChosen;
-  var startTime;
-  var endTime;
-  var startDate;
-  var endDate;
+  DateTime startRentDate;
+  DateTime endRentDate;
 
-  TransactionArguments(
-      {this.item,
-      this.rentChosen,
-      this.startDate,
-      this.endDate,
-      this.startTime,
-      this.endTime});
+  TransactionArguments({
+    this.item,
+    this.rentChosen,
+    this.startRentDate,
+    this.endRentDate,
+  });
 }
 
 class ItemDetailViewModel extends BaseModel {
   NavigationService _navigationService = locator<NavigationService>();
   void goToTransactionView(
-      var receivedItem,
-      var receivedRentChosen,
-      var receivedStartTime,
-      var receivedEndTime,
-      var receivedStartDate,
-      var receivedEndDate) {
+    var receivedItem,
+    var receivedRentChosen,
+    var receivedStartRentDate,
+    var receivedEndRentDate,
+  ) {
     TransactionArguments transacArgu = new TransactionArguments(
       item: receivedItem,
       rentChosen: receivedRentChosen,
-      startDate: receivedStartDate,
-      endDate: receivedEndDate,
-      startTime: receivedStartTime,
-      endTime: receivedEndTime,
+      startRentDate: receivedStartRentDate,
+      endRentDate: receivedEndRentDate,
     );
 
     //print(transacArgu.rentChosen);

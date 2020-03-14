@@ -7,6 +7,8 @@ class Item {
   var acquisition;
   bool isApproved;
   bool isRented;
+  String ownerID;
+  String ownerFCM;
 
   Item({
     this.id,
@@ -17,6 +19,8 @@ class Item {
     this.isApproved,
     this.isRented,
     this.acquisition,
+    this.ownerID,
+    this.ownerFCM,
   });
 
   Map<dynamic, dynamic> toMap() {
@@ -29,6 +33,8 @@ class Item {
       'is_approved': isApproved,
       'is_rented': isRented,
       'acquisition_map': acquisition,
+      'lender': ownerID,
+      'lender_token': ownerFCM
     };
   }
 
@@ -36,14 +42,15 @@ class Item {
     if (map == null) return null;
 
     return Item(
-      id: documentId,
-      itemName: map['item_name'],
-      itemDescription: map['item_description'],
-      rentingDetails: map['rent_details'],
-      itemImages: map['pictures'],
-      isApproved: map['is_approved'],
-      isRented: map['is_rented'],
-      acquisition: map['acquisition_map'],
-    );
+        id: documentId,
+        itemName: map['item_name'],
+        itemDescription: map['item_description'],
+        rentingDetails: map['rent_details'],
+        itemImages: map['pictures'],
+        isApproved: map['is_approved'],
+        isRented: map['is_rented'],
+        acquisition: map['acquisition_map'],
+        ownerID: map['lender'],
+        ownerFCM: map['lender_token']);
   }
 }

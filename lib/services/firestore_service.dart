@@ -19,6 +19,9 @@ class FirestoreService {
   final CollectionReference _operationsCollectionReference =
       Firestore.instance.collection("operations");
 
+  final CollectionReference _rentalsCollectionReference =
+      Firestore.instance.collection("rentals");
+
   FirebaseMessaging _fcm = FirebaseMessaging();
 
   final StreamController<List<Item>> _itemListingController =
@@ -136,6 +139,31 @@ class FirestoreService {
         .document(docRef.documentID)
         .updateData({
       'pictures': imgRef,
+    });
+  }
+
+  Future<void> submitRentingApplication(
+    Item item,
+    String lenderFCMToken,
+    Map rentDuration,
+    String renterID,
+    String renterFCMToken,
+    var rentChosenValue,
+    var serviceFeePayable,
+    var totalPayable,
+  ) async {
+    var renterFCMToken = await _fcm.getToken();
+    DocumentReference docRef = await _rentalsCollectionReference.add({
+      'item_ID': item.id,
+      'lender_ID': item.ownerID,
+      'lender_'
+      'lender_def_price': rentChosenValue,
+      'rent_duration': rentDuration,
+      'renter_ID': renterID,
+      'renter_fcm_token': renterFCMToken,
+      'service_fee': serviceFeePayable,
+      'total_price': totalPayable,
+      'status': 0,
     });
   }
 

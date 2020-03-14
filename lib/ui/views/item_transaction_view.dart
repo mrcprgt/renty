@@ -4,6 +4,9 @@ import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:renty_crud_version/viewmodels/item_transaction_view_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:supercharged/supercharged.dart';
+import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 
 class ItemTransactionView extends StatefulWidget {
   ItemTransactionView({
@@ -16,7 +19,7 @@ class ItemTransactionView extends StatefulWidget {
 }
 
 class _ItemTransactionViewState extends State<ItemTransactionView> {
-  var startDate, endDate, startTime, endTime, rentingDuration;
+  Duration rentingDuration;
 
   Widget build(BuildContext context) {
     return ViewModelProvider<ItemTransactionViewModel>.withConsumer(
@@ -63,8 +66,6 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
     );
   }
 
-  Widget _buildAddressList() {}
-
   Widget _buildProductOverview(
       BuildContext context, TransactionArguments transactionArguments) {
     return Padding(
@@ -101,21 +102,21 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
   }
 
   int _calculateRentingDuration(TransactionArguments transactionArguments) {
-    startDate = transactionArguments.startDate;
-    endDate = transactionArguments.endDate;
     switch (transactionArguments.rentChosen) {
       case "Hourly":
-        rentingDuration = transactionArguments.endTime
-            .difference(transactionArguments.startTime);
-        return rentingDuration.inHours;
+        rentingDuration = transactionArguments.endRentDate
+            .difference(transactionArguments.startRentDate);
+        print(transactionArguments.endRentDate.toString() +
+            " - " +
+            transactionArguments.startRentDate.toString());
+        print(rentingDuration.inHours);
+        return rentingDuration.inHours.toInt();
         break;
       case "Daily":
-        rentingDuration = endDate.difference(startDate);
-        return rentingDuration.inDays;
+        rentingDuration = transactionArguments.endRentDate
+            .difference(transactionArguments.startRentDate);
+        return rentingDuration.inDays.toInt();
         break;
-      case "Weekly":
-        break;
-      default:
     }
   }
 
@@ -163,6 +164,11 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
     return totalPayable;
   }
 
+  formatDateForDisplaying(DateTime date) {
+    String formattedDate = Jiffy(date).yMMMMEEEEdjm;
+    return formattedDate;
+  }
+
   _buildTransactionOverview(
           BuildContext context, TransactionArguments transactionArguments) =>
       Padding(
@@ -181,78 +187,84 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
               ),
               Column(
                 children: <Widget>[
-                  Text(transactionArguments.startDate.toString() +
+                  Text(formatDateForDisplaying(
+                          transactionArguments.startRentDate) +
                       " to " +
-                      transactionArguments.endDate.toString()),
+                      formatDateForDisplaying(
+                          transactionArguments.endRentDate)),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        "Rent Rate",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        "Rent Duration",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        "Service Fee",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        "TOTAL",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Text(
-                        transactionArguments.rentChosen == "Daily"
-                            ? transactionArguments.item.rentingDetails["perDay"]
-                                    .toString() +
-                                " /day"
-                            : transactionArguments.rentChosen == "Hourly"
-                                ? transactionArguments
-                                        .item.rentingDetails["perHour"]
-                                        .toString() +
-                                    " /hour"
-                                : transactionArguments
-                                        .item.rentingDetails["perWeek"]
-                                        .toString() +
-                                    " /week",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        _calculateRentingDuration(transactionArguments)
-                            .toString(),
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        calculateServiceFee(transactionArguments).toString(),
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        calculateTotal(transactionArguments).toString(),
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w900),
-                      ),
-                    ],
-                  )
+                  _buildRightSideTransactionDetails(),
+                  _buildLeftSideTransactionDetails(transactionArguments)
                 ],
-              )
+              ),
+              //FlatButton(onPressed: ,)
             ],
           ),
         ),
       );
 
-  
+  Column _buildLeftSideTransactionDetails(
+      TransactionArguments transactionArguments) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        Text(
+          transactionArguments.rentChosen == "Daily"
+              ? transactionArguments.item.rentingDetails["perDay"].toString() +
+                  ".00"
+              : transactionArguments.rentChosen == "Hourly"
+                  ? transactionArguments.item.rentingDetails["perHour"]
+                          .toString() +
+                      ".00"
+                  : transactionArguments.item.rentingDetails["perWeek"]
+                          .toString() +
+                      ".00",
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          _calculateRentingDuration(transactionArguments).toString() +
+              "${transactionArguments.rentChosen}",
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          calculateServiceFee(transactionArguments).toString(),
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          calculateTotal(transactionArguments).toString(),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+        ),
+      ],
+    );
+  }
+
+  Column _buildRightSideTransactionDetails() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Rent Rate",
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          "Rent Duration",
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          "Service Fee",
+          style: TextStyle(fontSize: 18),
+        ),
+        Text(
+          "TOTAL",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
   //EOF
 }

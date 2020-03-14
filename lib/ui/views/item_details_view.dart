@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
@@ -8,7 +7,7 @@ import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:http/http.dart' as http;
+import 'package:cloud_functions/cloud_functions.dart';
 
 class ItemDetailView extends StatefulWidget {
   const ItemDetailView(
@@ -25,17 +24,18 @@ class ItemDetailView extends StatefulWidget {
 class _ItemDetailViewState extends State<ItemDetailView> {
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   bool hourlyChip = false, dailyChip = false, weeklyChip = false;
-  static DateTime currentDay = DateTime.now();
+  static DateTime currentDay = DateTime.now().add(new Duration(days: 1));
   DateTime maxDate =
       new DateTime(currentDay.year, currentDay.month, currentDay.day + 5);
   DateTime maxWeek =
       new DateTime(currentDay.year, currentDay.month, currentDay.day + 14);
 
-  var startTime, endTime, startDate, endDate, rentChosen;
+  var startRentDate, endRentDate, rentChosen;
   var rentingDuration;
 
   @override
   Widget build(BuildContext context) {
+    print(currentDay);
     return ViewModelProvider<ItemDetailViewModel>.withConsumer(
       viewModel: ItemDetailViewModel(),
       builder: (context, model, child) => SafeArea(
@@ -164,9 +164,8 @@ class _ItemDetailViewState extends State<ItemDetailView> {
               ),
             ],
           ),
-          ConstrainedBox(
-            //padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            //height: MediaQuery.of(context).size.height,
+          Container(
+            height: MediaQuery.of(context).size.height,
             constraints: (BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height,
                 maxWidth: MediaQuery.of(context).size.width)),
@@ -174,6 +173,8 @@ class _ItemDetailViewState extends State<ItemDetailView> {
               //controller: tabController,
               children: <Widget>[
                 SingleChildScrollView(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                   child: Text(
                     item.itemDescription,
                     style: TextStyle(
@@ -181,11 +182,15 @@ class _ItemDetailViewState extends State<ItemDetailView> {
                     ),
                   ),
                 ),
-                Text(
-                  "5 STAR VERY SOLID PRODUCT WILL RENT AGAIN",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
+                SingleChildScrollView(
+                  child: Column(children: <Widget>[
+                    Text(
+                      "5 STAR VERY SOLID PRODUCT WILL RENT AGAIN",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ]),
                 )
               ],
             ),
@@ -340,123 +345,131 @@ class _ItemDetailViewState extends State<ItemDetailView> {
   Column buildRentingInput(BuildContext context) {
     return Column(
       children: <Widget>[
-        hourlyChip == true
-            ? Container(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                        child: FormBuilderDateTimePicker(
-                      attribute: "start_time",
-                      inputType: InputType.both,
-                      initialTime: TimeOfDay.now(),
-                      onChanged: (val) {
-                        startTime = new DateTime(val.hour, val.minute);
-                        startDate = new DateTime(val.year, val.month, val.day);
-                      },
-                      decoration: InputDecoration(
-                          labelText: "Start Time",
-                          border: OutlineInputBorder()),
-                    )),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                        // width: MediaQuery.of(context).size.width / 2 - 32,
-                        child: FormBuilderDateTimePicker(
-                      format: DateFormat("jm"),
-                      attribute: "end_time",
-                      onChanged: (val) {
-                        endTime = new DateTime(val.hour, val.minute);
-                        endDate = new DateTime(
-                          startDate.year,
-                          startDate.month,
-                          startDate.day,
-                        );
-                      },
-                      inputType: InputType.time,
-                      initialTime: TimeOfDay.now(),
-                      decoration: InputDecoration(
-                          labelText: "End Time", border: OutlineInputBorder()),
-                    )),
-                  ],
-                ),
-              )
-            : Container(),
-        dailyChip
-            ? Column(
-                children: <Widget>[
-                  FormBuilderDateRangePicker(
-                    attribute: "range_of_days",
-                    firstDate: currentDay,
-                    lastDate: maxDate,
-                    format: DateFormat(
-                      "MMM d, yyyy",
-                    ),
-                    decoration: InputDecoration(
-                        labelText: "Renting Duration",
-                        border: OutlineInputBorder()),
-                    onChanged: (picked) {
-                      startDate = _fbKey.currentState.fields["range_of_days"]
-                          .currentState.value[0];
-                      endDate = _fbKey.currentState.fields["range_of_days"]
-                          .currentState.value[1];
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  FormBuilderDateTimePicker(
-                    attribute: "time",
-                    inputType: InputType.time,
-                    format: DateFormat("jm"),
-                    initialTime: TimeOfDay.now(),
-                    onChanged: (val) {
-                      startTime = new DateTime(val.hour, val.minute);
-                      endTime = startTime;
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Time Needed", border: OutlineInputBorder()),
-                  )
-                ],
-              )
-            : Container(),
-        weeklyChip
-            ? Column(
-                children: <Widget>[
-                  FormBuilderDateRangePicker(
-                    attribute: "range_of_week",
-                    firstDate: currentDay,
-                    lastDate: maxWeek,
-                    format: DateFormat(
-                      "yyyy-MM-dd",
-                    ),
-                    onChanged: (picked) {
-                      startDate = _fbKey.currentState.fields["range_of_week"]
-                          .currentState.value[0];
-                      endDate = _fbKey.currentState.fields["range_of_week"]
-                          .currentState.value[1];
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Renting Duration",
-                        border: OutlineInputBorder()),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  FormBuilderDateTimePicker(
-                    attribute: "time",
-                    inputType: InputType.time,
-                    initialTime: TimeOfDay.now(),
-                    onChanged: (val) {
-                      startTime = new DateTime(val.hour, val.minute);
-                      endTime = startTime;
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Time Needed", border: OutlineInputBorder()),
-                  )
-                ],
-              )
-            : Container(),
+        hourlyChip ? buildHourlyPicker() : Container(),
+        dailyChip ? _buildDailyPicker() : Container(),
+        weeklyChip ? _buildWeekPicker() : Container(),
+      ],
+    );
+  }
+
+  Container buildHourlyPicker() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+              child: FormBuilderDateTimePicker(
+            attribute: "start_time",
+            inputType: InputType.both,
+            initialTime: TimeOfDay.now(),
+            initialDate: currentDay,
+            firstDate: currentDay,
+            onChanged: (val) {
+              startRentDate = val;
+            },
+            decoration: InputDecoration(
+                labelText: "Start Time", border: OutlineInputBorder()),
+          )),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+              // width: MediaQuery.of(context).size.width / 2 - 32,
+              child: FormBuilderDateTimePicker(
+            format: DateFormat("jm"),
+            attribute: "end_time",
+            onChanged: (val) {
+              endRentDate = new DateTime(
+                startRentDate.year,
+                startRentDate.month,
+                startRentDate.day,
+                val.hour,
+                val.minute,
+              );
+            },
+            inputType: InputType.time,
+            decoration: InputDecoration(
+                labelText: "End Time", border: OutlineInputBorder()),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Column _buildWeekPicker() {
+    return Column(
+      children: <Widget>[
+        FormBuilderDateRangePicker(
+          attribute: "range_of_week",
+          firstDate: currentDay,
+          lastDate: maxWeek,
+          format: DateFormat(
+            "yyyy-MM-dd",
+          ),
+          onChanged: (picked) {
+            startRentDate = _fbKey
+                .currentState.fields["range_of_week"].currentState.value[0];
+            endRentDate = _fbKey
+                .currentState.fields["range_of_week"].currentState.value[1];
+          },
+          decoration: InputDecoration(
+              labelText: "Renting Duration", border: OutlineInputBorder()),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        FormBuilderDateTimePicker(
+          attribute: "time",
+          inputType: InputType.time,
+          initialTime: TimeOfDay.now(),
+          onChanged: (val) {
+            startRentDate = new DateTime(startRentDate.year,
+                startRentDate.month, startRentDate.day, val.hour, val.minute);
+            endRentDate = new DateTime(endRentDate.year, endRentDate.month,
+                endRentDate.day, val.hour, val.minute);
+          },
+          decoration: InputDecoration(
+              labelText: "Time Needed", border: OutlineInputBorder()),
+        )
+      ],
+    );
+  }
+
+  Column _buildDailyPicker() {
+    return Column(
+      children: <Widget>[
+        FormBuilderDateRangePicker(
+          attribute: "range_of_days",
+          firstDate: currentDay,
+          lastDate: maxDate,
+          format: DateFormat(
+            "MMM d, yyyy",
+          ),
+          decoration: InputDecoration(
+              labelText: "Renting Duration", border: OutlineInputBorder()),
+          onChanged: (picked) {
+            startRentDate = _fbKey
+                .currentState.fields["range_of_days"].currentState.value[0];
+            endRentDate = _fbKey
+                .currentState.fields["range_of_days"].currentState.value[1];
+          },
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        FormBuilderDateTimePicker(
+          attribute: "time",
+          inputType: InputType.time,
+          format: DateFormat("jm"),
+          initialTime: TimeOfDay.now(),
+          onChanged: (val) {
+            startRentDate = new DateTime(startRentDate.year,
+                startRentDate.month, startRentDate.day, val.hour, val.minute);
+            endRentDate = new DateTime(endRentDate.year, endRentDate.month,
+                endRentDate.day, val.hour, val.minute);
+          },
+          decoration: InputDecoration(
+              labelText: "Time Needed", border: OutlineInputBorder()),
+        )
       ],
     );
   }
@@ -545,50 +558,52 @@ class _ItemDetailViewState extends State<ItemDetailView> {
             if (weeklyChip) {
               rentChosen = "Weekly";
             }
-            useCloudCalculate(item);
+            //useCloudCalculate(item);
             model.goToTransactionView(
-                item, rentChosen, startTime, endTime, startDate, endDate);
+                item, rentChosen, startRentDate, endRentDate);
           },
           //onPressed: () => model.goToTransactionView(item),
         )),
       );
 
-  Future useCloudCalculate(Item item) async {
-    int duration = _calculateRentingDuration(rentChosen);
-    int rate;
-    switch (rentChosen) {
-      case "Daily":
-        rate = int.parse(item.rentingDetails['perHour']);
-        break;
-      default:
-    }
+  // Future useCloudCalculate(Item item) async {
+  //   int duration = _calculateRentingDuration(rentChosen);
+  //   int rate;
+  //   switch (rentChosen) {
+  //     case "Daily":
+  //       rate = int.parse(item.rentingDetails['perHour']);
+  //       break;
+  //     default:
+  //   }
 
-    var url = 'https://us-central1-server-compute.cloudfunctions.net/serverCompute?';
+  //   final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+  //     functionName: 'serverCompute',
+  //   );
+  //   dynamic resp = await callable.call(<String, dynamic>{
+  //     'dailyRate': rate,
+  //     'day': duration,
+  //   });
 
-    var response =
-        await http.post(url, body: {'dailyRate': rate.toString(), 'day': duration.toString()});
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+  //   print(resp.runtimeType);
+  // }
 
-     print(await http.read(
-       'https://us-central1-server-compute.cloudfunctions.net/serverCompute?dailyRate=$rate&day=$duration'));
-  }
+  // int _calculateRentingDuration(var rentChosen) {
+  //   startDate = startDate;
+  //   endDate = endDate;
+  //   switch (rentChosen) {
+  //     case "Hourly":
+  //       rentingDuration = endTime.difference(startTime);
+  //       return rentingDuration.inHours;
+  //       break;
+  //     case "Daily":
+  //       rentingDuration = endDate.difference(startDate);
+  //       return rentingDuration.inDays;
+  //       break;
+  //     case "Weekly":
+  //       break;
+  //     default:
+  //   }
+  // }
 
-  int _calculateRentingDuration(var rentChosen) {
-    startDate = startDate;
-    endDate = endDate;
-    switch (rentChosen) {
-      case "Hourly":
-        rentingDuration = endTime.difference(startTime);
-        return rentingDuration.inHours;
-        break;
-      case "Daily":
-        rentingDuration = endDate.difference(startDate);
-        return rentingDuration.inDays;
-        break;
-      case "Weekly":
-        break;
-      default:
-    }
-  }
+  //EOF
 }
