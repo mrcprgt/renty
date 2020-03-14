@@ -8,6 +8,7 @@ import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:supercharged/supercharged.dart';
 
 class ItemDetailView extends StatefulWidget {
   const ItemDetailView(
@@ -400,7 +401,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
       children: <Widget>[
         FormBuilderDateRangePicker(
           attribute: "range_of_week",
-          firstDate: currentDay,
+          firstDate: DateTime.now(),
           lastDate: maxWeek,
           format: DateFormat(
             "yyyy-MM-dd",
@@ -439,7 +440,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
       children: <Widget>[
         FormBuilderDateRangePicker(
           attribute: "range_of_days",
-          firstDate: currentDay,
+          firstDate: DateTime.now(),
           lastDate: maxDate,
           format: DateFormat(
             "MMM d, yyyy",
@@ -558,7 +559,7 @@ class _ItemDetailViewState extends State<ItemDetailView> {
             if (weeklyChip) {
               rentChosen = "Weekly";
             }
-            //useCloudCalculate(item);
+            useCloudCalculate(item, startRentDate, endRentDate);
             model.goToTransactionView(
                 item, rentChosen, startRentDate, endRentDate);
           },
@@ -566,44 +567,45 @@ class _ItemDetailViewState extends State<ItemDetailView> {
         )),
       );
 
-  // Future useCloudCalculate(Item item) async {
-  //   int duration = _calculateRentingDuration(rentChosen);
-  //   int rate;
-  //   switch (rentChosen) {
-  //     case "Daily":
-  //       rate = int.parse(item.rentingDetails['perHour']);
-  //       break;
-  //     default:
-  //   }
+  Future useCloudCalculate(
+      Item item, DateTime startDate, DateTime endDate) async {
+    double duration = _calculateRentingDuration(rentChosen, startDate, endDate);
+    double rate;
+    switch (rentChosen) {
+      case "Daily":
+        rate = double.parse(item.rentingDetails['perDay']);
+        break;
+      default:
+    }
+    print(duration.toString() + " ----- " + rate.toString());
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'computeDaily',
+    );
+    HttpsCallableResult resp = await callable.call(<String, dynamic>{
+      'dailyRate': rate,
+      'day': duration,
+    });
 
-  //   final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-  //     functionName: 'serverCompute',
-  //   );
-  //   dynamic resp = await callable.call(<String, dynamic>{
-  //     'dailyRate': rate,
-  //     'day': duration,
-  //   });
+    //resp = resp.data.toInt();
+    print(resp.data);
+  }
 
-  //   print(resp.runtimeType);
-  // }
-
-  // int _calculateRentingDuration(var rentChosen) {
-  //   startDate = startDate;
-  //   endDate = endDate;
-  //   switch (rentChosen) {
-  //     case "Hourly":
-  //       rentingDuration = endTime.difference(startTime);
-  //       return rentingDuration.inHours;
-  //       break;
-  //     case "Daily":
-  //       rentingDuration = endDate.difference(startDate);
-  //       return rentingDuration.inDays;
-  //       break;
-  //     case "Weekly":
-  //       break;
-  //     default:
-  //   }
-  // }
+  double _calculateRentingDuration(
+      var rentChosen, DateTime startDate, DateTime endDate) {
+    switch (rentChosen) {
+      // case "Hourly":
+      //   rentingDuration = endTime.difference(startTime);
+      //   return rentingDuration.inHours;
+      //   break;
+      case "Daily":
+        rentingDuration = endDate.difference(startDate);
+        return rentingDuration.inDays.toDouble();
+        break;
+      case "Weekly":
+        break;
+      default:
+    }
+  }
 
   //EOF
 }

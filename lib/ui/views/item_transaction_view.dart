@@ -33,7 +33,8 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
             SliverFillRemaining(
               child: Column(
                 children: <Widget>[
-                  _buildTransactionOverview(context, widget.receivedArguments)
+                  _buildTransactionOverview(
+                      context, widget.receivedArguments, model)
                 ],
               ),
             )
@@ -170,7 +171,9 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
   }
 
   _buildTransactionOverview(
-          BuildContext context, TransactionArguments transactionArguments) =>
+          BuildContext context,
+          TransactionArguments transactionArguments,
+          ItemTransactionViewModel model) =>
       Padding(
         padding: const EdgeInsets.all(18.0),
         child: Container(
@@ -201,7 +204,23 @@ class _ItemTransactionViewState extends State<ItemTransactionView> {
                   _buildLeftSideTransactionDetails(transactionArguments)
                 ],
               ),
-              //FlatButton(onPressed: ,)
+              FlatButton(
+                  child: Text('RENT NOW'),
+                  onPressed: () {
+                    double serviceFeePayable =
+                        calculateServiceFee(transactionArguments);
+                    double totalPayable = calculateTotal(transactionArguments);
+                    double toSubmitRentChosen =
+                        checkRentChosen(transactionArguments) *
+                            _calculateRentingDuration(transactionArguments);
+                    model.submitApplicationRequest(
+                        transactionArguments.item,
+                        transactionArguments.startRentDate,
+                        transactionArguments.endRentDate,
+                        toSubmitRentChosen,
+                        serviceFeePayable,
+                        totalPayable);
+                  })
             ],
           ),
         ),
