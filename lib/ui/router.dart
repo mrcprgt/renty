@@ -1,4 +1,5 @@
 import 'package:renty_crud_version/models/item.dart';
+import 'package:renty_crud_version/ui/views/home_tab_view.dart';
 import 'package:renty_crud_version/ui/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:renty_crud_version/constants/route_names.dart';
@@ -6,20 +7,28 @@ import 'package:renty_crud_version/ui/views/item_details_view.dart';
 import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 import 'package:renty_crud_version/ui/views/item_transaction_view.dart';
 import 'package:renty_crud_version/ui/views/login_view.dart';
-import 'package:renty_crud_version/ui/views/signup_view.dart';
+import 'package:renty_crud_version/ui/widgets/onboarding.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
+    case OnboardingPageRoute:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: OnboardingPage(),
+      );
+
     case LoginViewRoute:
       return _getPageRoute(
         routeName: settings.name,
         viewToShow: LoginView(),
       );
-    case SignUpViewRoute:
+
+    case HomeTabViewRoute:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: SignUpView(),
+        viewToShow: HomeTabView(),
       );
+
     case HomeViewRoute:
       return _getPageRoute(
         routeName: settings.name,
