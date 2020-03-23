@@ -1,8 +1,7 @@
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:renty_crud_version/ui/shared/ui_helpers.dart';
 import 'package:renty_crud_version/ui/widgets/busy_button.dart';
-import 'package:renty_crud_version/ui/widgets/input_field.dart';
-import 'package:renty_crud_version/ui/widgets/text_link.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/provider_architecture.dart';
 import 'package:renty_crud_version/viewmodels/login_view_model.dart';
@@ -42,6 +41,7 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
   FocusNode focusNode;
   bool obscureText = true;
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  final GlobalKey<FormBuilderState> _signUpKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
@@ -66,6 +66,7 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
                 child: Text(
                   "Login",
                   style: TextStyle(
+                    fontSize: 18,
                     color: Colors.black,
                   ),
                 ),
@@ -74,6 +75,7 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
                 child: Text(
                   "Sign Up",
                   style: TextStyle(
+                    fontSize: 18,
                     color: Colors.black,
                   ),
                 ),
@@ -88,7 +90,7 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
             //     maxWidth: MediaQuery.of(context).size.width)),
             child: TabBarView(children: <Widget>[
               _buildLoginForm(context),
-              _buildLoginForm(context)
+              _buildSignUpForm(context)
             ]),
           )
         ],
@@ -96,10 +98,97 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
     );
   }
 
-  Widget _buildLoginForm(BuildContext context) {
+  Widget _buildSignUpForm(BuildContext context) {
     return SingleChildScrollView(
       child: FormBuilder(
         key: _fbKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            verticalSpaceSmall,
+            FormBuilderTextField(
+              attribute: "fullname",
+              // autovalidate: true,
+              // keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
+              onFieldSubmitted: (val) {
+                FocusScope.of(context).requestFocus(focusNode);
+              },
+              validators: [
+                FormBuilderValidators.minLength(8,
+                    errorText: "Please enter a longer email."),
+                FormBuilderValidators.maxLength(30,
+                    errorText: "You have entered a very long email!"),
+              ],
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
+                  labelText: "Full Name"),
+            ),
+            verticalSpaceSmall,
+            FormBuilderTextField(
+              attribute: "username",
+              // autovalidate: true,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
+              onFieldSubmitted: (val) {
+                FocusScope.of(context).requestFocus(focusNode);
+              },
+              validators: [
+                FormBuilderValidators.email(),
+                FormBuilderValidators.minLength(8,
+                    errorText: "Please enter a longer email."),
+                FormBuilderValidators.maxLength(30,
+                    errorText: "You have entered a very long email!"),
+              ],
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                  labelText: "Email"),
+            ),
+            verticalSpaceSmall,
+            FormBuilderTextField(
+              attribute: "password",
+              obscureText: obscureText,
+              textInputAction: TextInputAction.done,
+              maxLines: 1,
+              focusNode: focusNode,
+              validators: [
+                FormBuilderValidators.minLength(6,
+                    errorText: "Please enter a longer password."),
+                FormBuilderValidators.maxLength(30,
+                    errorText: "You have entered a very long password!"),
+              ],
+              onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
+                  suffixIcon: GestureDetector(
+                    child: !obscureText
+                        ? Icon(Icons.visibility)
+                        : Icon(Icons.visibility_off),
+                    onTap: () {
+                      setState(() {
+                        obscureText = !obscureText;
+                      });
+                    },
+                  ),
+                  labelText: "Password"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm(BuildContext context) {
+    return SingleChildScrollView(
+      child: FormBuilder(
+        key: _signUpKey,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
