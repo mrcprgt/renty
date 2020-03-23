@@ -13,8 +13,7 @@ class LoginViewModel extends BaseModel {
   final DialogService _dialogService = locator<DialogService>();
   final NavigationService _navigationService = locator<NavigationService>();
 
-  Future logInWithEmail(
-      @required String email, @required String password) async {
+  Future logInWithEmail(String email, String password) async {
     setBusy(true);
 
     var result = await _authenticationService.loginWithEmail(
@@ -24,7 +23,7 @@ class LoginViewModel extends BaseModel {
 
     if (result is bool) {
       if (result) {
-        _navigationService.navigateTo(HomeViewRoute);
+        _navigationService.navigateTo(HomeTabViewRoute);
       } else {
         await _dialogService.showDialog(
             title: 'Oops! Something went wrong',
