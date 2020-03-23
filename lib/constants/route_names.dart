@@ -4,4 +4,7 @@ const String HomeViewRoute = "HomeView";
 const String ItemDetailViewRoute = "ItemDetailView";
 const String ItemLendViewRoute = "ItemLendView";
 const String ItemTransactionViewRoute = "ItemTransactionView";
+const String HomeTabViewRoute = "HomeTabView";
+const String MyProfilePageRoute = "MyProfilePage";
+const String MyItemsPageRoute = "MyItemsPage";
 // Generate the views here
