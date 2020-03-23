@@ -53,7 +53,7 @@ class _InputFieldState extends State<InputField> {
     super.initState();
     showPassword = false;
     isPassword = widget.password;
-    if(isPassword){
+    if (isPassword) {
       showPassword = true;
     }
   }
