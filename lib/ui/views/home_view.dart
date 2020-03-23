@@ -24,7 +24,6 @@ class HomeView extends StatelessWidget {
                     child: CustomScrollView(
                       slivers: <Widget>[
                         _buildAppBar(context, model),
-                        _buildSliverHeader(),
                         //_buildCategoriesBar(context, model),
                         _buildGridView(context, model),
                       ],
@@ -40,19 +39,8 @@ class HomeView extends StatelessWidget {
               child: Icon(Icons.add),
               onPressed: () => model.goToItemLendPage(),
             ),
-            bottomNavigationBar: _buildBottomNavBar(context, model),
+            // bottomNavigationBar: _buildBottomNavBar(context, model),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSliverHeader() {
-    return SliverToBoxAdapter(
-      child: Container(
-        child: Text(
-          'Good Morning, User',
-          textScaleFactor: 2.5,
         ),
       ),
     );
@@ -78,7 +66,7 @@ class HomeView extends StatelessWidget {
               children: <Widget>[
                 ClipOval(
                   child: Material(
-                    color: Colors.blue, // button color
+                    color: Colors.pink, // button color
                     child: InkWell(
                       splashColor: Colors.red, // inkwell color
                       // child: SizedBox(
@@ -118,7 +106,8 @@ class HomeView extends StatelessWidget {
       automaticallyImplyLeading: false,
       pinned: false,
       floating: true,
-      title: _buildSearchField(context, model),
+      flexibleSpace: _buildSearchField(context, model),
+      // title:
     );
   }
 
@@ -132,6 +121,7 @@ class HomeView extends StatelessWidget {
           autofocus: false,
           style: TextStyle(),
           decoration: InputDecoration(
+            border: OutlineInputBorder(borderSide: BorderSide.none),
             prefixIcon: Icon(Icons.search),
           )),
       suggestionsCallback: (pattern) async {
@@ -171,24 +161,6 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavBar(BuildContext context, HomeViewModel model) {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      items: [
-        BottomNavigationBarItem(
-          icon: new Icon(Icons.home),
-          title: new Text('Home'),
-        ),
-        BottomNavigationBarItem(
-          icon: new Icon(Icons.person),
-          title: new Text('Profile'),
-        ),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.settings), title: Text('Settings'))
-      ],
-    );
-  }
-
   //TODO : Double tap back to exit.
   Future<bool> onWillPop() {
     DateTime currentBackPressTime;
@@ -203,15 +175,4 @@ class HomeView extends StatelessWidget {
   }
 
 //EOF
-}
-
-class BottomNavigationBarProvider with ChangeNotifier {
-  int _currentIndex = 0;
-
-  get currentIndex => _currentIndex;
-
-  set currentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
-  }
 }
