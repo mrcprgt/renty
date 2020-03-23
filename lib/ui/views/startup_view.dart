@@ -8,23 +8,26 @@ class StartUpView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelProvider<StartUpViewModel>.withConsumer(
-        viewModel: StartUpViewModel(),
-        onModelReady: (model) => model.handleStartUpLogic(),
-        builder: (context, model, child) => Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-                child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SizedBox(
-                    width: 300,
-                    height: 100,
-                    child: Image.asset('assets/images/logo.png')),
-                CircularProgressIndicator(
-                    strokeWidth: 3,
-                    //TODO: Find hex color of logo
-                    valueColor: AlwaysStoppedAnimation(Colors.pink))
-              ],
-            ))));
+      viewModel: StartUpViewModel(),
+      onModelReady: (model) => model.handleStartUpLogic(),
+      builder: (context, model, child) => Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: Image.asset('assets/images/logo.png')),
+              CircularProgressIndicator(
+                  strokeWidth: 3,
+                  //TODO: Find hex color of logo
+                  valueColor: AlwaysStoppedAnimation(Colors.pink))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
