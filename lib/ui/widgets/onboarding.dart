@@ -11,14 +11,6 @@ class _OnboardingPageState extends State<OnboardingPage>
     with SingleTickerProviderStateMixin {
   final introKey = GlobalKey<IntroductionScreenState>();
 
-  TabController _tabController;
-
-  @override
-  void initState() {
-    _tabController = new TabController(length: 2, vsync: this);
-    super.initState();
-  }
-
   void _onIntroEnd(context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => LoginView()),
@@ -78,47 +70,17 @@ class _OnboardingPageState extends State<OnboardingPage>
       skipFlex: 0,
       nextFlex: 0,
       skip: const Text('Skip'),
+      onSkip: () => _onIntroEnd(context),
       next: const Icon(Icons.arrow_forward),
       done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
       dotsDecorator: const DotsDecorator(
         size: Size(10.0, 10.0),
-        color: Colors.grey,
+        color: Colors.blue,
         activeColor: Colors.pink,
         activeSize: Size(22.0, 10.0),
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
         ),
-      ),
-    );
-  }
-
-  _buildLoginForms() {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: <Widget>[
-              Tab(
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "Sign Up",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              )
-            ],
-            indicatorColor: Colors.pink,
-          )
-        ],
       ),
     );
   }
