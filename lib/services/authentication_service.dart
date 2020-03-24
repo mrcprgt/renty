@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:renty_crud_version/models/user.dart';
 import 'package:renty_crud_version/locator.dart';
 import 'firestore_service.dart';
@@ -7,7 +8,12 @@ import 'firestore_service.dart';
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirestoreService _firestoreService = locator<FirestoreService>();
-
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
   User _currentUser;
   User get currentUser => _currentUser;
 
@@ -51,6 +57,14 @@ class AuthenticationService {
     } catch (e) {
       //return e.message;
       return e.toString();
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    try {
+      await _googleSignIn.signIn();
+    } catch (error) {
+      print(error);
     }
   }
 

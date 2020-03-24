@@ -1,7 +1,8 @@
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_signin_button/button_list.dart';
+import 'package:flutter_signin_button/button_view.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:renty_crud_version/ui/shared/ui_helpers.dart';
-import 'package:renty_crud_version/ui/widgets/busy_button.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/provider_architecture.dart';
 import 'package:renty_crud_version/viewmodels/login_view_model.dart';
@@ -12,17 +13,25 @@ class LoginView extends StatelessWidget {
     return ViewModelProvider<LoginViewModel>.withConsumer(
       viewModel: LoginViewModel(),
       builder: (context, model, child) => SafeArea(
-        child: SafeArea(
-          child: Scaffold(
-              backgroundColor: Colors.white,
-              body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: SingleChildScrollView(
-                  child: LoginAndSignUpTabView(
-                    model: model,
+        child: LoadingOverlay(
+          opacity: 0.75,
+          color: Colors.white,
+          progressIndicator: CircularProgressIndicator(
+            backgroundColor: Colors.pinkAccent,
+          ),
+          isLoading: model.busy,
+          child: SafeArea(
+            child: Scaffold(
+                backgroundColor: Colors.white,
+                body: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SingleChildScrollView(
+                    child: LoginAndSignUpTabView(
+                      model: model,
+                    ),
                   ),
-                ),
-              )),
+                )),
+          ),
         ),
       ),
     );
@@ -38,15 +47,18 @@ class LoginAndSignUpTabView extends StatefulWidget {
 
 class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
     with SingleTickerProviderStateMixin {
-  FocusNode focusNode;
+  FocusNode loginPasswordFocusNode,
+      registerEmailFocusNode,
+      registerPasswordFocusNode;
   bool obscureText = true;
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
-  final GlobalKey<FormBuilderState> _signUpKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode();
+    loginPasswordFocusNode = FocusNode();
+    registerEmailFocusNode = FocusNode();
+    registerPasswordFocusNode = FocusNode();
   }
 
   @override
@@ -56,8 +68,8 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
       child: Column(
         children: <Widget>[
           SizedBox(
-            height: 200,
-            child: Image.asset('assets/images/logo.png', fit: BoxFit.fill),
+            height: 150,
+            child: Image.asset('assets/images/logo.png', fit: BoxFit.fitHeight),
           ),
           TabBar(
             indicatorColor: Colors.pink,
@@ -82,16 +94,16 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
               )
             ],
           ),
-          verticalSpaceMedium,
-          Container(
-            height: MediaQuery.of(context).size.height / 2,
-            // constraints: (BoxConstraints(
-            //     maxHeight: MediaQuery.of(context).size.height,
-            //     maxWidth: MediaQuery.of(context).size.width)),
-            child: TabBarView(children: <Widget>[
-              _buildLoginForm(context),
-              _buildSignUpForm(context)
-            ]),
+          verticalSpaceSmall,
+          FormBuilder(
+            key: _fbKey,
+            child: Container(
+              height: MediaQuery.of(context).size.height / 1.5,
+              child: TabBarView(children: <Widget>[
+                _buildLoginForm(context),
+                _buildSignUpForm(context)
+              ]),
+            ),
           )
         ],
       ),
@@ -100,28 +112,27 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
 
   Widget _buildSignUpForm(BuildContext context) {
     return SingleChildScrollView(
-      child: FormBuilder(
-        key: _fbKey,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            verticalSpaceSmall,
             FormBuilderTextField(
               attribute: "fullname",
-              // autovalidate: true,
-              // keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
               onFieldSubmitted: (val) {
-                FocusScope.of(context).requestFocus(focusNode);
+                FocusScope.of(context).requestFocus(registerEmailFocusNode);
               },
               validators: [
                 FormBuilderValidators.minLength(8,
-                    errorText: "Please enter a longer email."),
+                    errorText:
+                        "Please enter a longer name. Your name can't be that short would it?"),
                 FormBuilderValidators.maxLength(30,
-                    errorText: "You have entered a very long email!"),
+                    errorText:
+                        "You have entered a very long name! Don't you have a shorter name?"),
               ],
               decoration: InputDecoration(
                   prefixIcon: Icon(Icons.person),
@@ -130,13 +141,13 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
             ),
             verticalSpaceSmall,
             FormBuilderTextField(
-              attribute: "username",
-              // autovalidate: true,
+              attribute: "signup_email",
+              focusNode: registerEmailFocusNode,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
               onFieldSubmitted: (val) {
-                FocusScope.of(context).requestFocus(focusNode);
+                FocusScope.of(context).requestFocus(registerPasswordFocusNode);
               },
               validators: [
                 FormBuilderValidators.email(),
@@ -152,11 +163,11 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
             ),
             verticalSpaceSmall,
             FormBuilderTextField(
-              attribute: "password",
+              attribute: "signup_password",
               obscureText: obscureText,
               textInputAction: TextInputAction.done,
               maxLines: 1,
-              focusNode: focusNode,
+              focusNode: registerPasswordFocusNode,
               validators: [
                 FormBuilderValidators.minLength(6,
                     errorText: "Please enter a longer password."),
@@ -179,6 +190,8 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
                   ),
                   labelText: "Password"),
             ),
+            verticalSpaceMedium,
+            _buildRegitrationButtons(),
           ],
         ),
       ),
@@ -187,22 +200,20 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
 
   Widget _buildLoginForm(BuildContext context) {
     return SingleChildScrollView(
-      child: FormBuilder(
-        key: _signUpKey,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            verticalSpaceSmall,
             FormBuilderTextField(
-              attribute: "username",
-              // autovalidate: true,
+              attribute: "login_username",
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               onEditingComplete: () => _fbKey.currentState.saveAndValidate(),
               onFieldSubmitted: (val) {
-                FocusScope.of(context).requestFocus(focusNode);
+                FocusScope.of(context).requestFocus(loginPasswordFocusNode);
               },
               validators: [
                 FormBuilderValidators.email(),
@@ -218,11 +229,11 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
             ),
             verticalSpaceSmall,
             FormBuilderTextField(
-              attribute: "password",
+              attribute: "login_password",
               obscureText: obscureText,
               textInputAction: TextInputAction.done,
               maxLines: 1,
-              focusNode: focusNode,
+              focusNode: loginPasswordFocusNode,
               validators: [
                 FormBuilderValidators.minLength(6,
                     errorText: "Please enter a longer password."),
@@ -246,30 +257,70 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
                   labelText: "Password"),
             ),
             verticalSpaceMedium,
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                BusyButton(
-                  title: 'Login',
-                  busy: widget.model.busy,
-                  onPressed: () {
-                    //print(_fbKey.currentState.fields["username"].currentState.va)
-                    widget.model.logInWithEmail(
-                        _fbKey
-                            .currentState.fields["username"].currentState.value
-                            .toString(),
-                        _fbKey
-                            .currentState.fields["password"].currentState.value
-                            .toString());
-                  },
-                )
-              ],
-            ),
+            _buildLoginButtons(),
             verticalSpaceMedium,
           ],
         ),
       ),
+    );
+  }
+
+  Column _buildLoginButtons() {
+    return Column(
+      children: <Widget>[
+        SignInButton(
+          Buttons.Email,
+          text: "Login with Renty Account",
+          onPressed: () => widget.model.logInWithEmail(
+              _fbKey.currentState.fields["login_username"].currentState.value
+                  .toString(),
+              _fbKey.currentState.fields["login_password"].currentState.value
+                  .toString()),
+        ),
+        verticalSpaceSmall,
+        Text("OR"),
+        verticalSpaceSmall,
+        SignInButton(
+          Buttons.GoogleDark,
+          onPressed: () {
+            widget.model.signInWithGoogle();
+          },
+        )
+      ],
+    );
+  }
+
+  Column _buildRegitrationButtons() {
+    return Column(
+      children: <Widget>[
+        SignInButton(
+          Buttons.Email,
+          text: "Register a Renty Account",
+          onPressed: () => widget.model.signUpWithEmail(
+            _fbKey.currentState.fields["signup_username"].currentState.value
+                .toString(),
+            _fbKey.currentState.fields["signup_password"].currentState.value
+                .toString(),
+            _fbKey.currentState.fields["fullname"].currentState.value
+                .toString(),
+          ),
+        ),
+        verticalSpaceSmall,
+        Text("OR"),
+        verticalSpaceSmall,
+        SignInButton(
+          Buttons.GoogleDark,
+          text: "Register with Google",
+          onPressed: () => widget.model.signUpWithEmail(
+            _fbKey.currentState.fields["signup_username"].currentState.value
+                .toString(),
+            _fbKey.currentState.fields["signup_password"].currentState.value
+                .toString(),
+            _fbKey.currentState.fields["fullname"].currentState.value
+                .toString(),
+          ),
+        ),
+      ],
     );
   }
 }
