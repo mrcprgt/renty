@@ -1,4 +1,4 @@
-package com.filledstacks.compound;
+package com.pandabois.renty_crud;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
