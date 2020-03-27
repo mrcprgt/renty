@@ -26,7 +26,7 @@ class User {
         contactNumber = data['contact_number'],
         address = data['address'],
         birthDate = data['birth_date'],
-        accountCreated = data['acc_created'],
+        accountCreated = data['acc_created'].toDate(),
         isVerifiedUser = data['is_verified'];
 
   Map<String, dynamic> toJson() {
