@@ -8,4 +8,5 @@ const String ItemTransactionViewRoute = "ItemTransactionView";
 const String HomeTabViewRoute = "HomeTabView";
 const String MyProfilePageRoute = "MyProfilePage";
 const String MyItemsPageRoute = "MyItemsPage";
+const String AccountViewPageRoute = "AccountsView";
 // Generate the views here
