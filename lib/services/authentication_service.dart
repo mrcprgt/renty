@@ -62,9 +62,27 @@ class AuthenticationService {
 
   Future<void> loginWithGoogle() async {
     try {
-      await _googleSignIn.signIn();
-    } catch (error) {
-      print(error);
+      GoogleSignInAccount account = await _googleSignIn.signIn();
+      if (account == null) return false;
+      AuthResult res = await _firebaseAuth
+          .signInWithCredential(GoogleAuthProvider.getCredential(
+            idToken: (await account.authentication).idToken,
+            accessToken: (await account.authentication).accessToken,
+          ))
+          .whenComplete(() => print("loggedin"));
+      var firebaseUser = await _firebaseAuth.currentUser();
+      _currentUser = User(
+          id: firebaseUser.uid,
+          fullName: firebaseUser.uid,
+          email: firebaseUser.email);
+      await _firestoreService.createUser(_currentUser);
+
+      if (res.user == null) return false;
+      return true;
+    } catch (e) {
+      print(e.message);
+      print("Error logging with google");
+      return false;
     }
   }
 
@@ -83,5 +101,9 @@ class AuthenticationService {
   Future getUserDetails() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     return user.uid.toString();
+  }
+
+  Future logOut() async {
+    await _firebaseAuth.signOut();
   }
 }

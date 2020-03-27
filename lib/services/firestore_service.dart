@@ -32,7 +32,16 @@ class FirestoreService {
   //make user
   Future createUser(User user) async {
     try {
-      await _usersCollectionReference.document(user.id).setData(user.toJson());
+      await _usersCollectionReference.document(user.id).setData({
+        'id': user.id,
+        'acc_created': DateTime.now(),
+        'email': user.email,
+        'full_name': user.fullName,
+        'address': user.address,
+        'birth_date': user.birthDate,
+        'contact_number': user.contactNumber,
+        'is_verified': false,
+      });
     } catch (e) {
       if (e is PlatformException) return e.message;
     }
