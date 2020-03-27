@@ -19,7 +19,7 @@ class StartUpViewModel extends BaseModel {
 
     //Check if user is logged in.
     var hasLoggedInUser = await _authenticationService.isUserLoggedIn();
-    //print('Is a user logged in? :' + hasLoggedInUser.toString());
+    print('Is a user logged in? :' + hasLoggedInUser.toString());
     if (hasLoggedInUser) {
       _navigationService.navigateTo(HomeTabViewRoute);
     } else {

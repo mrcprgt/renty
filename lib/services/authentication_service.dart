@@ -88,14 +88,11 @@ class AuthenticationService {
 
   Future<bool> isUserLoggedIn() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
-    print(user.email);
     await _populateCurrentUser(user);
     return user != null;
   }
 
   Future _populateCurrentUser(FirebaseUser user) async {
-    print(user.email);
-    print(user.uid);
     if (user != null) {
       _currentUser = await _firestoreService.getUser(user.uid);
     }
