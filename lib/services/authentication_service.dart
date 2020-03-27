@@ -68,16 +68,15 @@ class AuthenticationService {
           .signInWithCredential(GoogleAuthProvider.getCredential(
         idToken: (await account.authentication).idToken,
         accessToken: (await account.authentication).accessToken,
-      ))
-          .then((var dog) async {
-        var firebaseUser = await _firebaseAuth.currentUser();
-        _currentUser = User(
-            id: firebaseUser.uid,
-            fullName: firebaseUser.displayName,
-            email: firebaseUser.email);
-        await _firestoreService.createUser(_currentUser);
-      });
+      ));
 
+      var firebaseUser = await _firebaseAuth.currentUser();
+      _currentUser = User(
+          id: firebaseUser.uid,
+          fullName: firebaseUser.displayName,
+          email: firebaseUser.email);
+
+      await _firestoreService.createUser(_currentUser);
       if (res.user == null) return false;
       return true;
     } catch (e) {
@@ -88,12 +87,15 @@ class AuthenticationService {
   }
 
   Future<bool> isUserLoggedIn() async {
-    var user = await _firebaseAuth.currentUser();
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    print(user.email);
     await _populateCurrentUser(user);
     return user != null;
   }
 
   Future _populateCurrentUser(FirebaseUser user) async {
+    print(user.email);
+    print(user.uid);
     if (user != null) {
       _currentUser = await _firestoreService.getUser(user.uid);
     }

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/models/operations.dart';
@@ -47,15 +48,17 @@ class FirestoreService {
 
   //Get user
   Future getUser(String uid) async {
+    Logger logger = Logger();
+    logger.d("running getUserFunction");
     try {
       var userData = await _usersCollectionReference.document(uid).get();
+      print(User.fromData(userData.data));
       return User.fromData(userData.data);
     } catch (e) {
-      // TODO: Find or create a way to repeat error handling without so much repeated code
       if (e is PlatformException) {
         return e.message;
       }
-
+      logger.e(e.toString());
       return e.toString();
     }
   }
