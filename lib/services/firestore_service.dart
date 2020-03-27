@@ -5,11 +5,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:renty_crud_version/locator.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/models/operations.dart';
 import 'package:renty_crud_version/models/user.dart';
-import 'package:renty_crud_version/services/authentication_service.dart';
 
 class FirestoreService {
   final CollectionReference _usersCollectionReference =

@@ -66,16 +66,17 @@ class AuthenticationService {
       if (account == null) return false;
       AuthResult res = await _firebaseAuth
           .signInWithCredential(GoogleAuthProvider.getCredential(
-            idToken: (await account.authentication).idToken,
-            accessToken: (await account.authentication).accessToken,
-          ))
-          .whenComplete(() => print("loggedin"));
-      var firebaseUser = await _firebaseAuth.currentUser();
-      _currentUser = User(
-          id: firebaseUser.uid,
-          fullName: firebaseUser.uid,
-          email: firebaseUser.email);
-      await _firestoreService.createUser(_currentUser);
+        idToken: (await account.authentication).idToken,
+        accessToken: (await account.authentication).accessToken,
+      ))
+          .then((var dog) async {
+        var firebaseUser = await _firebaseAuth.currentUser();
+        _currentUser = User(
+            id: firebaseUser.uid,
+            fullName: firebaseUser.displayName,
+            email: firebaseUser.email);
+        await _firestoreService.createUser(_currentUser);
+      });
 
       if (res.user == null) return false;
       return true;
