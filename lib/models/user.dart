@@ -5,6 +5,7 @@ class User {
   final int contactNumber;
   final String address;
   final DateTime birthDate;
+  final DateTime accountCreated;
 
   final bool isVerifiedUser;
 
@@ -15,26 +16,29 @@ class User {
       this.contactNumber,
       this.address,
       this.birthDate,
+      this.accountCreated,
       this.isVerifiedUser});
 
   User.fromData(Map<String, dynamic> data)
       : id = data['id'],
-        fullName = data['fullName'],
+        fullName = data['full_name'],
         email = data['email'],
-        contactNumber = data['contactNumber'],
+        contactNumber = data['contact_number'],
         address = data['address'],
-        birthDate = data['birthDate'],
-        isVerifiedUser = data['isVerifiedUser'];
+        birthDate = data['birth_date'],
+        accountCreated = data['acc_created'],
+        isVerifiedUser = data['is_verified'];
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'fullName' : fullName,
+      'full_name': fullName,
       'email': email,
-      'contactNumber': contactNumber,
+      'contact_number': contactNumber,
       'address': address,
-      'birthDate': birthDate,
-      'isVerifiedUser': isVerifiedUser
+      'birth_date': birthDate,
+      'acc_created': accountCreated,
+      'is_verified': isVerifiedUser
     };
   }
 }
