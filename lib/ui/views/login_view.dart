@@ -297,7 +297,7 @@ class _LoginAndSignUpTabViewState extends State<LoginAndSignUpTabView>
           Buttons.Email,
           text: "Register a Renty Account",
           onPressed: () => widget.model.signUpWithEmail(
-            _fbKey.currentState.fields["signup_username"].currentState.value
+            _fbKey.currentState.fields["signup_email"].currentState.value
                 .toString(),
             _fbKey.currentState.fields["signup_password"].currentState.value
                 .toString(),
