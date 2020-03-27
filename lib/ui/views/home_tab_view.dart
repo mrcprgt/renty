@@ -1,5 +1,6 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:renty_crud_version/ui/views/accounts_view.dart';
 import 'package:renty_crud_version/ui/views/home_view.dart';
 import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 
@@ -26,7 +27,9 @@ class _HomeTabViewState extends State<HomeTabView> {
 
   List<Widget> pages = [
     HomeView(),
-    ItemLendView(),
+    AccountsView(),
+    AccountsView(),
+    AccountsView()
   ];
 
   @override
@@ -54,12 +57,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                 title: Text('Home'),
                 textAlign: TextAlign.center,
                 icon: Icon(Icons.home),
-                activeColor: Colors.pink,
-                inactiveColor: Colors.grey),
-            BottomNavyBarItem(
-                title: Text('Add Item'),
-                textAlign: TextAlign.center,
-                icon: Icon(Icons.add),
                 activeColor: Colors.pink,
                 inactiveColor: Colors.grey),
             BottomNavyBarItem(
