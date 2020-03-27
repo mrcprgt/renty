@@ -1,4 +1,5 @@
 import 'package:renty_crud_version/models/item.dart';
+import 'package:renty_crud_version/ui/views/accounts_view.dart';
 import 'package:renty_crud_version/ui/views/home_tab_view.dart';
 import 'package:renty_crud_version/ui/views/home_view.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(
         routeName: settings.name,
         viewToShow: LoginView(),
+      );
+
+    case AccountViewPageRoute:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: AccountsView(),
       );
 
     case HomeTabViewRoute:
