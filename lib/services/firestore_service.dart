@@ -207,6 +207,7 @@ class FirestoreService {
   ) async {
     var renterFCMToken = await _fcm.getToken();
     DocumentReference docRef = await _rentalsCollectionReference.add({
+      'date_entered': DateTime.now(),
       'item_ID': item.id,
       'lender_ID': item.ownerID,
       'lender_fcm_token': item.ownerFCM,
