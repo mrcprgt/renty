@@ -17,7 +17,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Logger.level = Level.verbose;
+    Logger.level = Level.warning;
     return MaterialApp(
       title: 'Renty',
       builder: (context, child) => Navigator(
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.pink,
         textTheme: Theme.of(context).textTheme.apply(
-              fontFamily: 'Open Sans',
+              fontFamily: 'Roboto',
             ),
       ),
       home: StartUpView(),
