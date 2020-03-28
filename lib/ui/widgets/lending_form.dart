@@ -480,7 +480,7 @@ class _LendingFormState extends State<LendingForm>
         child: Text("Submit"),
         onPressed: () {
           if (_fbKey.currentState.saveAndValidate()) {
-            _navigationService.navigateTo(HomeViewRoute);
+            _navigationService.navigateTo(HomeTabViewRoute);
             submitForm();
             _dialogService.showConfirmationDialog(
                 title: 'Item Added',
