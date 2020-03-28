@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:renty_crud_version/viewmodels/item_transaction_view_model.dart';
-import 'package:http/http.dart' as http;
-import 'package:supercharged/supercharged.dart';
-import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 
 class ItemTransactionView extends StatefulWidget {
