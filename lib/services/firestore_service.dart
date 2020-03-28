@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:renty_crud_version/models/item.dart';
-import 'package:renty_crud_version/models/operations.dart';
 import 'package:renty_crud_version/models/user.dart';
 
 class FirestoreService {
@@ -17,9 +16,6 @@ class FirestoreService {
   final CollectionReference _itemListingsCollectionReference =
       Firestore.instance.collection('items');
 
-  final CollectionReference _operationsCollectionReference =
-      Firestore.instance.collection("operations");
-
   final CollectionReference _rentalsCollectionReference =
       Firestore.instance.collection("rentals");
 
@@ -27,6 +23,11 @@ class FirestoreService {
 
   final StreamController<List<Item>> _itemListingController =
       StreamController<List<Item>>.broadcast();
+
+  //For realtime lazy load
+  DocumentSnapshot _lastDocument;
+  List<List<Item>> _allPagedResults = List<List<Item>>();
+  bool _hasMorePosts = true;
 
   //make user
   Future createUser(User user) async {
@@ -63,45 +64,87 @@ class FirestoreService {
     }
   }
 
+  //cancel streaming subscription
+  void cancelSubscription() {
+    _itemListingController.close();
+  }
+
   //Streaming assets to grid view
   Stream listenToItemRealTime() {
-    // Register the handler for when the posts data changes
-    _itemListingsCollectionReference.snapshots().listen((itemListSnapshot) {
-      if (itemListSnapshot.documents.isNotEmpty) {
-        var items = itemListSnapshot.documents
+    _requestItems();
+
+    return _itemListingController.stream;
+  }
+
+  void _requestItems() {
+    // #2: split the query from the actual subscription
+    var pageItemsQuery = _itemListingsCollectionReference
+        .orderBy('date_entered', descending: true)
+        // #3: Limit the amount of results
+        .limit(20);
+
+    // If there's no more posts then bail out of the function
+    if (!_hasMorePosts) return;
+
+    if (_lastDocument != null) {
+      pageItemsQuery = pageItemsQuery.startAfterDocument(_lastDocument);
+    }
+    var currentRequestIndex = _allPagedResults.length;
+
+    pageItemsQuery.snapshots().listen((postsSnapshot) {
+      if (postsSnapshot.documents.isNotEmpty) {
+        var posts = postsSnapshot.documents
             .map((snapshot) => Item.fromMap(snapshot.data, snapshot.documentID))
             .where((mappedItem) =>
                 mappedItem.itemName != null && mappedItem.isApproved)
             .toList();
 
-        //TODO: Sort by date.
+        // Check if the page exists or not
+        var pageExists = currentRequestIndex < _allPagedResults.length;
 
-        // Add the posts onto the controller
-        _itemListingController.add(items);
+        // If the page exists update the posts for that page
+        if (pageExists) {
+          _allPagedResults[currentRequestIndex] = posts;
+        }
+        // If the page doesn't exist add the page data
+        else {
+          _allPagedResults.add(posts);
+        }
+
+        // Concatenate the full list to be shown
+        var allPosts = _allPagedResults.fold<List<Item>>(List<Item>(),
+            (initialValue, pageItems) => initialValue..addAll(pageItems));
+
+        //  Broadcase all posts
+        _itemListingController.add(allPosts);
+
+        // Save the last document from the results only if it's the current last page
+        if (currentRequestIndex == _allPagedResults.length - 1) {
+          _lastDocument = postsSnapshot.documents.last;
+        }
+
+        // Determine if there's more posts to request
+        _hasMorePosts = posts.length == 20;
       }
     });
+    // // Register the handler for when the posts data changes
+    // _itemListingsCollectionReference.snapshots().listen((itemListSnapshot) {
+    //   //check if document is not empty
+    //   if (itemListSnapshot.documents.isNotEmpty) {
+    //     //assign the snapshot to a variable and convert data to Map. Check if approved.
+    //     var items = itemListSnapshot.documents
+    //         .map((snapshot) => Item.fromMap(snapshot.data, snapshot.documentID))
+    //         .where((mappedItem) =>
+    //             mappedItem.itemName != null && mappedItem.isApproved)
+    //         .toList();
 
-    return _itemListingController.stream;
+    //     // Add the posts onto the controller
+    //     _itemListingController.add(items);
+    //   }
+    // });
   }
 
-  Future<Operations> getOperationsFromDb() async {
-    var documentRef = _operationsCollectionReference.document("items");
-    Operations operationsFromFirebase = new Operations();
-    documentRef.get().then((DocumentSnapshot ds) {
-      if (ds.exists) {
-        operationsFromFirebase.categoriesMap = ds.data['categories'];
-        operationsFromFirebase.serviceFee = ds.data['service_fee_%'];
-
-        // print('service catg map ' +
-        //     operationsFromFirebase.categoriesMap.length.toString());
-        // print('service oper ' + operationsFromFirebase.serviceFee.toString());
-        return operationsFromFirebase;
-      } else {
-        return operationsFromFirebase;
-      }
-    });
-    return operationsFromFirebase;
-  }
+  void requestMoreData() => _requestItems();
 
   Future uploadImages(List<Asset> asset, String docRefId) async {
     List<dynamic> imgUrls = new List();
