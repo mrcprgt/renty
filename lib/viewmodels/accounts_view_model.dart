@@ -21,8 +21,9 @@ class AccountsViewModel extends BaseModel {
   List getUserDetails() {
     var fullName = _authenticationService.currentUser.fullName;
     var emailAddress = _authenticationService.currentUser.email;
+    var isVerified = _authenticationService.currentUser.isVerifiedUser;
 
-    var userDetailsMap = [fullName, emailAddress];
+    var userDetailsMap = [fullName, emailAddress, isVerified];
     return userDetailsMap;
   }
 
