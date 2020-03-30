@@ -1,17 +1,7 @@
 {
-  "folders": [
-    {
-      "path": "."
-    }
-  ],
-  "settings": {
-    "explorer.openEditors.visible": 7,
-    "search.smartCase": true,
-    "telemetry.enableTelemetry": false,
-    "sync.autoUpload": true,
-    "sync.quietSync": true,
-    "dart.allowAnalytics": false,
-    "dart.openDevTools": "flutter",
-    "dart.previewFlutterUiGuides": true
-  }
+	"folders": [
+		{
+			"path": "."
+		}
+	]
 }
