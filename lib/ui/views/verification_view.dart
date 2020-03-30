@@ -28,6 +28,13 @@ class _VerificationViewState extends State<VerificationView> {
       streetController = new TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    cityController = new TextEditingController(text: ' ');
+    streetController = new TextEditingController(text: ' ');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ViewModelProvider<VerificationViewModel>.withConsumer(
       viewModel: VerificationViewModel(),
@@ -36,6 +43,9 @@ class _VerificationViewState extends State<VerificationView> {
         _safeAreaSize = mediaQD.size;
         return SafeArea(
           child: Scaffold(
+            appBar: AppBar(
+              title: Text("Account Verification"),
+            ),
             body: Column(
               children: <Widget>[
                 Container(height: 150.0, child: _getStepProgress()),
@@ -133,6 +143,7 @@ class _VerificationViewState extends State<VerificationView> {
                   fillColor: Colors.pink,
                   //labelText: "Occupation",
                   helperText: "Select your gender"),
+              validators: [FormBuilderValidators.required()],
             ),
             FormBuilderDateTimePicker(
               attribute: "birth_date",
@@ -145,6 +156,7 @@ class _VerificationViewState extends State<VerificationView> {
                   labelText: "Birthdate",
                   hintText: "--/--/----",
                   helperText: "Enter your birthdate here"),
+              validators: [FormBuilderValidators.required()],
             ),
             verticalSpaceSmall,
             FormBuilderTextField(
@@ -158,6 +170,7 @@ class _VerificationViewState extends State<VerificationView> {
                   fillColor: Colors.pink,
                   labelText: "Contact Number",
                   helperText: "Enter your contact number here"),
+              validators: [FormBuilderValidators.required()],
             ),
             verticalSpaceSmall,
           ],
@@ -205,6 +218,7 @@ class _VerificationViewState extends State<VerificationView> {
             FormBuilderTextField(
               attribute: "city_municipality",
               keyboardType: TextInputType.text,
+              controller: cityController,
               initialValue: cityValue,
               onTap: () => showPickerModal(context, cityValue, streetValue,
                   cityController, streetController),
@@ -218,6 +232,7 @@ class _VerificationViewState extends State<VerificationView> {
             FormBuilderTextField(
               onTap: () => showPickerModal(context, cityValue, streetValue,
                   cityController, streetController),
+              controller: streetController,
               focusNode: new AlwaysDisabledFocusNode(),
               attribute: "street",
               keyboardType: TextInputType.text,
@@ -227,6 +242,17 @@ class _VerificationViewState extends State<VerificationView> {
                 labelText: "Street",
               ),
             ),
+            FormBuilderTextField(
+              attribute: "additional_notes",
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.border_color),
+                  fillColor: Colors.pink,
+                  labelText: "Additional Notes",
+                  helperText:
+                      "Put some additional notes regarding your address here."),
+            )
           ],
         ),
       ),
@@ -258,6 +284,19 @@ showPickerModal(
             .trim()
             .toString();
 
-        print(cityValue + "" + streetValue);
+        // prrint(cityValue + "" + streetValue);
+        print(cityController);
+        cityController.value = TextEditingValue(
+          text: cityValue,
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: cityValue.length),
+          ),
+        );
+        streetController.value = TextEditingValue(
+          text: streetValue,
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: streetValue.length),
+          ),
+        );
       }).showModal(context);
 }
