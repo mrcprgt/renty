@@ -60,7 +60,6 @@ class FirestoreService {
         return e.message;
       }
       logger.e(e.toString());
-      return e.toString();
     }
   }
 
@@ -166,6 +165,7 @@ class FirestoreService {
     return imgUrls;
   }
 
+  //List an item for rent
   Future<void> submitLendingData(
       String formItemName,
       String formItemDescription,
@@ -197,6 +197,7 @@ class FirestoreService {
     });
   }
 
+  //Submit a Renting application
   Future<void> submitRentingApplication(
     Item item,
     var renterID,
@@ -224,6 +225,20 @@ class FirestoreService {
         .document(renterID)
         .collection('transactions')
         .add({'item_id': item.id, 'status': null});
+  }
+
+  Future<void> updateAccountDetails(
+    String uid,
+    String gender,
+    DateTime birthDate,
+    String contactNumber,
+    Map address,
+  ) async {
+    await _usersCollectionReference.document(uid).updateData({
+      "phone": contactNumber,
+      "b_date": birthDate,
+      "address": address,
+    });
   }
 
   //EOF
