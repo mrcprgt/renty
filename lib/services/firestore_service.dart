@@ -206,7 +206,7 @@ class FirestoreService {
     var totalPayable,
   ) async {
     var renterFCMToken = await _fcm.getToken();
-    DocumentReference docRef = await _rentalsCollectionReference.add({
+    await _rentalsCollectionReference.add({
       'date_entered': DateTime.now(),
       'item_ID': item.id,
       'lender_ID': item.ownerID,
@@ -219,6 +219,11 @@ class FirestoreService {
       'total_price': totalPayable,
       'status': null,
     });
+
+    _usersCollectionReference
+        .document(renterID)
+        .collection('transactions')
+        .add({'item_id': item.id, 'status': null});
   }
 
   //EOF
