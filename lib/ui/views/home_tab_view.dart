@@ -2,7 +2,6 @@ import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:renty_crud_version/ui/views/accounts_view.dart';
 import 'package:renty_crud_version/ui/views/home_view.dart';
-import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 
 class HomeTabView extends StatefulWidget {
   @override

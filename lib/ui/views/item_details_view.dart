@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_picker/flutter_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
@@ -8,7 +7,6 @@ import 'package:renty_crud_version/viewmodels/item_details_view_model.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:supercharged/supercharged.dart';
 
 class ItemDetailView extends StatefulWidget {
   const ItemDetailView(
