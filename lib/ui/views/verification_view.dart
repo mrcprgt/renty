@@ -1,24 +1,29 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
+import 'package:renty_crud_version/constants/tos.dart';
 import 'package:renty_crud_version/ui/shared/ui_helpers.dart';
 import 'package:renty_crud_version/ui/widgets/step_progress.dart';
 import 'package:renty_crud_version/viewmodels/verification_view_model.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import "../../constants/AddressData.dart";
+import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
 
 class VerificationView extends StatefulWidget {
   @override
   _VerificationViewState createState() => _VerificationViewState();
 }
 
-class _VerificationViewState extends State<VerificationView> {
+class _VerificationViewState extends State<VerificationView>
+    with AutomaticKeepAliveClientMixin {
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   final PageController _pageController = new PageController();
   var maskTextInputFormatter = MaskTextInputFormatter(
@@ -26,12 +31,34 @@ class _VerificationViewState extends State<VerificationView> {
   String cityValue, streetValue = "";
   TextEditingController cityController,
       streetController = new TextEditingController();
+  bool checked = false;
+
+  final PageStorageBucket _bucket = new PageStorageBucket();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     cityController = new TextEditingController(text: ' ');
     streetController = new TextEditingController(text: ' ');
+  }
+
+  File _image;
+
+  Future getImage(ImgSource source) async {
+    var image = await ImagePickerGC.pickImage(
+      context: context,
+      source: source,
+      cameraIcon: Icon(
+        Icons.add,
+        color: Colors.red,
+      ), //cameraIcon and galleryIcon can change. If no icon provided default icon will be present
+    );
+    setState(() {
+      _image = image;
+    });
   }
 
   @override
@@ -41,6 +68,7 @@ class _VerificationViewState extends State<VerificationView> {
       builder: (context, model, child) {
         var mediaQD = MediaQuery.of(context);
         _safeAreaSize = mediaQD.size;
+        super.build(context);
         return SafeArea(
           child: Scaffold(
             appBar: AppBar(
@@ -48,7 +76,7 @@ class _VerificationViewState extends State<VerificationView> {
             ),
             body: Column(
               children: <Widget>[
-                Container(height: 150.0, child: _getStepProgress()),
+                Container(height: 100.0, child: _getStepProgress()),
                 Expanded(
                   child: FormBuilder(
                     key: _fbKey,
@@ -57,13 +85,14 @@ class _VerificationViewState extends State<VerificationView> {
                       onPageChanged: (i) {
                         setState(() {
                           _curPage = i + 1;
+                          _fbKey.currentState.saveAndValidate();
                         });
                       },
                       children: <Widget>[
                         _buildBirtdateForms(),
                         _buildAddress(),
-                        _buildBirtdateForms(),
-                        _buildBirtdateForms(),
+                        _buildValidID(),
+                        _buildTOS(),
                       ],
                     ),
                   ),
@@ -106,7 +135,7 @@ class _VerificationViewState extends State<VerificationView> {
       _stepStyle,
       decoration: BoxDecoration(color: Colors.white),
       padding: EdgeInsets.only(
-        top: 48.0,
+        top: 24.0,
         left: 24.0,
         right: 24.0,
       ),
@@ -136,7 +165,7 @@ class _VerificationViewState extends State<VerificationView> {
                       DropdownMenuItem(value: gender, child: Text("$gender")))
                   .toList(),
               hint: Text("Gender"),
-              onChanged: (val) => _fbKey.currentState.saveAndValidate(),
+              onChanged: (val) => _fbKey.currentState.save(),
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
@@ -149,6 +178,7 @@ class _VerificationViewState extends State<VerificationView> {
               attribute: "birth_date",
               inputType: InputType.date,
               format: DateFormat.yMMMMd(),
+              onEditingComplete: () => _fbKey.currentState.save(),
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   prefixIcon: Icon(Icons.cake),
@@ -156,13 +186,16 @@ class _VerificationViewState extends State<VerificationView> {
                   labelText: "Birthdate",
                   hintText: "--/--/----",
                   helperText: "Enter your birthdate here"),
-              validators: [FormBuilderValidators.required()],
+              validators: [
+                FormBuilderValidators.required(),
+              ],
             ),
             verticalSpaceSmall,
             FormBuilderTextField(
               attribute: "contact_number",
               initialValue: "+639",
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               inputFormatters: [maskTextInputFormatter],
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
@@ -171,12 +204,62 @@ class _VerificationViewState extends State<VerificationView> {
                   labelText: "Contact Number",
                   helperText: "Enter your contact number here"),
               validators: [FormBuilderValidators.required()],
+              onEditingComplete: () {
+                if (_fbKey.currentState.saveAndValidate()) {
+                  setState(() {
+                    _pageController.jumpToPage(_curPage);
+                    FocusScope.of(context).unfocus();
+                    FocusScope.of(context).nextFocus();
+                  });
+                }
+              },
             ),
             verticalSpaceSmall,
           ],
         ),
       ),
     );
+  }
+
+  showPickerModal(
+      BuildContext context,
+      String cityValue,
+      String streetValue,
+      TextEditingController cityController,
+      TextEditingController streetController) {
+    new Picker(
+        height: 300,
+        adapter: PickerDataAdapter<String>(
+            pickerdata: new JsonDecoder().convert(PickerData)),
+        changeToFirst: true,
+        hideHeader: false,
+        onConfirm: (Picker picker, List value) {
+          cityValue = picker.adapter.text
+              .replaceAll("[", "")
+              .split(",")[0]
+              .trim()
+              .toString();
+          streetValue = picker.adapter.text
+              .replaceAll("]", "")
+              .split(",")[1]
+              .trim()
+              .toString();
+
+          // prrint(cityValue + "" + streetValue);
+          print(cityController);
+          cityController.value = TextEditingValue(
+            text: cityValue,
+            selection: TextSelection.fromPosition(
+              TextPosition(offset: cityValue.length),
+            ),
+          );
+          streetController.value = TextEditingValue(
+            text: streetValue,
+            selection: TextSelection.fromPosition(
+              TextPosition(offset: streetValue.length),
+            ),
+          );
+        }).showModal(context);
   }
 
   Widget _buildAddress() {
@@ -197,6 +280,8 @@ class _VerificationViewState extends State<VerificationView> {
             FormBuilderTextField(
               attribute: "address_name",
               keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.next,
+              autofocus: true,
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   prefixIcon: Icon(Icons.home),
@@ -258,45 +343,109 @@ class _VerificationViewState extends State<VerificationView> {
       ),
     );
   }
-}
 
-showPickerModal(
-    BuildContext context,
-    String cityValue,
-    String streetValue,
-    TextEditingController cityController,
-    TextEditingController streetController) {
-  new Picker(
-      height: 300,
-      adapter: PickerDataAdapter<String>(
-          pickerdata: new JsonDecoder().convert(PickerData)),
-      changeToFirst: true,
-      hideHeader: false,
-      onConfirm: (Picker picker, List value) {
-        cityValue = picker.adapter.text
-            .replaceAll("[", "")
-            .split(",")[0]
-            .trim()
-            .toString();
-        streetValue = picker.adapter.text
-            .replaceAll("]", "")
-            .split(",")[1]
-            .trim()
-            .toString();
+  //TODO: make 2 image pickers and upload them to firestore
+  Widget _buildValidID() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: <Widget>[
+            ExpandablePanel(
+              header: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text("Valid ID", style: TextStyle(fontSize: 24)),
+                  Icon(Icons.contact_mail, size: 25)
+                ],
+              ),
+              collapsed: Text(
+                "Please provide a front and back picture of your Valid ID.",
+                softWrap: true,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              expanded: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                      "Please provide a front and back picture of your Valid ID. Example of Valid ID's : "),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Text("· Driver's License"),
+                      Text("· Passport"),
+                      Text("· PRC"),
+                      Text("· SSS/GSIS ID"),
+                      Text("· BIR ID"),
+                      Text("· Philhealth Card"),
+                      Text("· Company ID"),
+                      Text("· NBI Clearance"),
+                      Text("· School ID"),
+                      Text("· Postal ID"),
+                      Text("· Senior Citizen ID"),
+                      Text(
+                          "· Marriage Certificate with Barangay/Police Clearance"),
+                      Text("· OFW ID"),
+                      Text("· Seaman\s Book, NCWDP, DSWD ID"),
+                    ],
+                  ),
+                ],
+              ),
 
-        // prrint(cityValue + "" + streetValue);
-        print(cityController);
-        cityController.value = TextEditingValue(
-          text: cityValue,
-          selection: TextSelection.fromPosition(
-            TextPosition(offset: cityValue.length),
-          ),
-        );
-        streetController.value = TextEditingValue(
-          text: streetValue,
-          selection: TextSelection.fromPosition(
-            TextPosition(offset: streetValue.length),
-          ),
-        );
-      }).showModal(context);
+              // PRC, SSS/GSIS ID, BIR ID, Philhealth Card, Company ID, NBI Clearance, School ID, Postal ID, Senior Citizen ID, Marriage Certificate with Barangay/Police Clearance, OFW ID, Seaman's Book, NCWDP, DSWD ID",
+            ),
+            Container(
+              width: 300,
+              child: RaisedButton(
+                onPressed: () => getImage(ImgSource.Camera),
+                color: Colors.deepPurple,
+                child: Text(
+                  "From Camera".toUpperCase(),
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            Container(
+              width: 300,
+              child: RaisedButton(
+                onPressed: () => getImage(ImgSource.Both),
+                color: Colors.red,
+                child: Text(
+                  "Both".toUpperCase(),
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            _image != null ? Image.file(_image) : Container(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTOS() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: <Widget>[
+            Text(
+              TOS,
+              textAlign: TextAlign.justify,
+            ),
+            FormBuilderCheckbox(
+              attribute: "checked",
+              label: Text(
+                "I agree to the terms and conditions.",
+                style: TextStyle(fontSize: 16),
+              ),
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(borderSide: BorderSide.none)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
