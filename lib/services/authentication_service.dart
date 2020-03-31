@@ -63,7 +63,8 @@ class AuthenticationService {
   Future<void> loginWithGoogle() async {
     try {
       GoogleSignInAccount account = await _googleSignIn.signIn();
-      if (account == null) return false;
+      GoogleSignInAuthentication googleAuth = await account.authentication;
+
       AuthResult res = await _firebaseAuth
           .signInWithCredential(GoogleAuthProvider.getCredential(
         idToken: (await account.authentication).idToken,
@@ -77,8 +78,10 @@ class AuthenticationService {
           email: firebaseUser.email);
 
       await _firestoreService.createUser(_currentUser);
-      if (res.user == null) return false;
-      return true;
+      print(firebaseUser.uid);
+      await _populateCurrentUser(firebaseUser);
+
+      return res != null;
     } catch (e) {
       print(e.message);
       print("Error logging with google");
