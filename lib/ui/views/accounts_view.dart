@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:loading_overlay/loading_overlay.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 import 'package:renty_crud_version/viewmodels/accounts_view_model.dart';
 
