@@ -22,28 +22,27 @@ class VerificationView extends StatefulWidget {
   _VerificationViewState createState() => _VerificationViewState();
 }
 
-class _VerificationViewState extends State<VerificationView>
-    with AutomaticKeepAliveClientMixin {
-  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
-  final PageController _pageController = new PageController();
-  var maskTextInputFormatter = MaskTextInputFormatter(
-      mask: "+639##-###-####", filter: {"#": RegExp(r'[0-9]')});
-  String cityValue, streetValue = "";
-  TextEditingController cityController,
-      streetController = new TextEditingController();
+//Global Variables kek
+
+//FormBuilder Key
+final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+
+//Controller for Pageview
+final PageController _pageController = new PageController(keepPage: true);
+int _curPage = 1;
+
+//Step Progress Variables
+final _stepsText = ["Birthdate", "Address", "Valid ID", "Legality"];
+final _stepCircleRadius = 10.0;
+final _stepProgressViewHeight = 150.0;
+Color _activeColor = Colors.pink;
+Color _inactiveColor = Colors.blue;
+TextStyle _headerStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold);
+TextStyle _stepStyle = TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold);
+Size _safeAreaSize;
+
+class _VerificationViewState extends State<VerificationView> {
   bool checked = false;
-
-  final PageStorageBucket _bucket = new PageStorageBucket();
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    super.initState();
-    cityController = new TextEditingController(text: ' ');
-    streetController = new TextEditingController(text: ' ');
-  }
 
   File _image;
 
@@ -68,7 +67,7 @@ class _VerificationViewState extends State<VerificationView>
       builder: (context, model, child) {
         var mediaQD = MediaQuery.of(context);
         _safeAreaSize = mediaQD.size;
-        super.build(context);
+
         return SafeArea(
           child: Scaffold(
             appBar: AppBar(
@@ -85,14 +84,13 @@ class _VerificationViewState extends State<VerificationView>
                       onPageChanged: (i) {
                         setState(() {
                           _curPage = i + 1;
-                          _fbKey.currentState.saveAndValidate();
                         });
                       },
                       children: <Widget>[
-                        _buildBirtdateForms(),
-                        _buildAddress(),
+                        BirthDateForm(),
+                        AddressForm(),
                         _buildValidID(),
-                        _buildTOS(),
+                        _buildTOS(model),
                       ],
                     ),
                   ),
@@ -104,23 +102,6 @@ class _VerificationViewState extends State<VerificationView>
       },
     );
   }
-
-  //Step Progress Variables
-  final _stepsText = ["Birthdate", "Address", "Valid ID", "Legality"];
-  final _stepCircleRadius = 10.0;
-  final _stepProgressViewHeight = 150.0;
-  Color _activeColor = Colors.pink;
-  Color _inactiveColor = Colors.blue;
-  TextStyle _headerStyle =
-      TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold);
-  TextStyle _stepStyle = TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold);
-  Size _safeAreaSize;
-  int _curPage = 1;
-  List<DropdownMenuItem> occupations = [
-    DropdownMenuItem(child: Text("Student")),
-    DropdownMenuItem(child: Text("Unemployed")),
-    DropdownMenuItem(child: Text("Employed")),
-  ];
 
   StepProgressView _getStepProgress() {
     return StepProgressView(
@@ -138,208 +119,6 @@ class _VerificationViewState extends State<VerificationView>
         top: 24.0,
         left: 24.0,
         right: 24.0,
-      ),
-    );
-  }
-
-  Widget _buildBirtdateForms() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "We want to know you more!",
-                  style: TextStyle(fontSize: 24),
-                ),
-              ],
-            ),
-            verticalSpaceSmall,
-            FormBuilderDropdown(
-              attribute: "occupation",
-              items: ['Male', 'Female', 'Other']
-                  .map((gender) =>
-                      DropdownMenuItem(value: gender, child: Text("$gender")))
-                  .toList(),
-              hint: Text("Gender"),
-              onChanged: (val) => _fbKey.currentState.save(),
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
-                  fillColor: Colors.pink,
-                  //labelText: "Occupation",
-                  helperText: "Select your gender"),
-              validators: [FormBuilderValidators.required()],
-            ),
-            FormBuilderDateTimePicker(
-              attribute: "birth_date",
-              inputType: InputType.date,
-              format: DateFormat.yMMMMd(),
-              onEditingComplete: () => _fbKey.currentState.save(),
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.cake),
-                  fillColor: Colors.pink,
-                  labelText: "Birthdate",
-                  hintText: "--/--/----",
-                  helperText: "Enter your birthdate here"),
-              validators: [
-                FormBuilderValidators.required(),
-              ],
-            ),
-            verticalSpaceSmall,
-            FormBuilderTextField(
-              attribute: "contact_number",
-              initialValue: "+639",
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.next,
-              inputFormatters: [maskTextInputFormatter],
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
-                  fillColor: Colors.pink,
-                  labelText: "Contact Number",
-                  helperText: "Enter your contact number here"),
-              validators: [FormBuilderValidators.required()],
-              onEditingComplete: () {
-                if (_fbKey.currentState.saveAndValidate()) {
-                  setState(() {
-                    _pageController.jumpToPage(_curPage);
-                    FocusScope.of(context).unfocus();
-                    FocusScope.of(context).nextFocus();
-                  });
-                }
-              },
-            ),
-            verticalSpaceSmall,
-          ],
-        ),
-      ),
-    );
-  }
-
-  showPickerModal(
-      BuildContext context,
-      String cityValue,
-      String streetValue,
-      TextEditingController cityController,
-      TextEditingController streetController) {
-    new Picker(
-        height: 300,
-        adapter: PickerDataAdapter<String>(
-            pickerdata: new JsonDecoder().convert(PickerData)),
-        changeToFirst: true,
-        hideHeader: false,
-        onConfirm: (Picker picker, List value) {
-          cityValue = picker.adapter.text
-              .replaceAll("[", "")
-              .split(",")[0]
-              .trim()
-              .toString();
-          streetValue = picker.adapter.text
-              .replaceAll("]", "")
-              .split(",")[1]
-              .trim()
-              .toString();
-
-          // prrint(cityValue + "" + streetValue);
-          print(cityController);
-          cityController.value = TextEditingValue(
-            text: cityValue,
-            selection: TextSelection.fromPosition(
-              TextPosition(offset: cityValue.length),
-            ),
-          );
-          streetController.value = TextEditingValue(
-            text: streetValue,
-            selection: TextSelection.fromPosition(
-              TextPosition(offset: streetValue.length),
-            ),
-          );
-        }).showModal(context);
-  }
-
-  Widget _buildAddress() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "Address Details",
-                  style: TextStyle(fontSize: 24),
-                ),
-              ],
-            ),
-            FormBuilderTextField(
-              attribute: "address_name",
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              autofocus: true,
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.home),
-                  fillColor: Colors.pink,
-                  labelText: "Address Name",
-                  helperText: "Enter the address name here"),
-            ),
-            FormBuilderTextField(
-              enabled: false,
-              attribute: "floor_unitno",
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.business),
-                  fillColor: Colors.pink,
-                  labelText: "Floor/Unit Number",
-                  helperText: "Enter the floor or unit number here"),
-            ),
-            FormBuilderTextField(
-              attribute: "city_municipality",
-              keyboardType: TextInputType.text,
-              controller: cityController,
-              initialValue: cityValue,
-              onTap: () => showPickerModal(context, cityValue, streetValue,
-                  cityController, streetController),
-              focusNode: new AlwaysDisabledFocusNode(),
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                fillColor: Colors.pink,
-                labelText: "City/Municipality",
-              ),
-            ),
-            FormBuilderTextField(
-              onTap: () => showPickerModal(context, cityValue, streetValue,
-                  cityController, streetController),
-              controller: streetController,
-              focusNode: new AlwaysDisabledFocusNode(),
-              attribute: "street",
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                fillColor: Colors.pink,
-                labelText: "Street",
-              ),
-            ),
-            FormBuilderTextField(
-              attribute: "additional_notes",
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  prefixIcon: Icon(Icons.border_color),
-                  fillColor: Colors.pink,
-                  labelText: "Additional Notes",
-                  helperText:
-                      "Put some additional notes regarding your address here."),
-            )
-          ],
-        ),
       ),
     );
   }
@@ -424,7 +203,7 @@ class _VerificationViewState extends State<VerificationView>
     );
   }
 
-  Widget _buildTOS() {
+  Widget _buildTOS(VerificationViewModel model) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -440,9 +219,264 @@ class _VerificationViewState extends State<VerificationView>
                 "I agree to the terms and conditions.",
                 style: TextStyle(fontSize: 16),
               ),
+              onChanged: (val) {
+                model.submitAccountVerification(
+                    _fbKey.currentState.fields["gender"].currentState.value,
+                    _fbKey.currentState.fields["birth_date"].currentState.value,
+                    _fbKey.currentState.fields["contact_number"].currentState
+                        .value,
+                    _fbKey
+                        .currentState.fields["address_name"].currentState.value,
+                    _fbKey
+                        .currentState.fields["floor_unitno"].currentState.value,
+                    _fbKey.currentState.fields["city_municipality"].currentState
+                        .value,
+                    _fbKey.currentState.fields["barangay_street"].currentState
+                        .value,
+                    _fbKey.currentState.fields["additional_notes"].currentState
+                        .value);
+              },
               decoration: InputDecoration(
                   border: UnderlineInputBorder(borderSide: BorderSide.none)),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BirthDateForm extends StatefulWidget {
+  @override
+  _BirthDateFormState createState() => _BirthDateFormState();
+}
+
+class _BirthDateFormState extends State<BirthDateForm>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+  var maskTextInputFormatter = MaskTextInputFormatter(
+      mask: "+639##-###-####", filter: {"#": RegExp(r'[0-9]')});
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "We want to know you more!",
+                  style: TextStyle(fontSize: 24),
+                ),
+              ],
+            ),
+            verticalSpaceSmall,
+            FormBuilderDropdown(
+              attribute: "gender",
+              items: ['Male', 'Female', 'Other']
+                  .map((gender) =>
+                      DropdownMenuItem(value: gender, child: Text("$gender")))
+                  .toList(),
+              hint: Text("Gender"),
+              onChanged: (val) => _fbKey.currentState.save(),
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                  fillColor: Colors.pink,
+                  //labelText: "Occupation",
+                  helperText: "Select your gender"),
+              validators: [FormBuilderValidators.required()],
+            ),
+            FormBuilderDateTimePicker(
+              attribute: "birth_date",
+              inputType: InputType.date,
+              format: DateFormat.yMMMMd(),
+              onEditingComplete: () => _fbKey.currentState.save(),
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.cake),
+                  fillColor: Colors.pink,
+                  labelText: "Birthdate",
+                  hintText: "--/--/----",
+                  helperText: "Enter your birthdate here"),
+              validators: [
+                FormBuilderValidators.required(),
+              ],
+            ),
+            verticalSpaceSmall,
+            FormBuilderTextField(
+              attribute: "contact_number",
+              initialValue: "+639",
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [maskTextInputFormatter],
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                  fillColor: Colors.pink,
+                  labelText: "Contact Number",
+                  helperText: "Enter your contact number here"),
+              validators: [FormBuilderValidators.required()],
+              onEditingComplete: () {
+                if (_fbKey.currentState.saveAndValidate()) {
+                  setState(() {
+                    _pageController.jumpToPage(_curPage);
+                    FocusScope.of(context).unfocus();
+                    //FocusScope.of(context).nextFocus();
+                  });
+                }
+              },
+            ),
+            verticalSpaceSmall,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AddressForm extends StatefulWidget {
+  @override
+  _AddressFormState createState() => _AddressFormState();
+}
+
+class _AddressFormState extends State<AddressForm>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  String cityValue, streetValue = "";
+  TextEditingController cityController,
+      streetController = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    cityController = new TextEditingController(text: ' ');
+    streetController = new TextEditingController(text: ' ');
+  }
+
+  showPickerModal(
+      BuildContext context,
+      String cityValue,
+      String streetValue,
+      TextEditingController cityController,
+      TextEditingController streetController) {
+    new Picker(
+        height: 300,
+        adapter: PickerDataAdapter<String>(
+            pickerdata: new JsonDecoder().convert(PickerData)),
+        changeToFirst: true,
+        hideHeader: false,
+        onConfirm: (Picker picker, List value) {
+          cityValue = picker.adapter.text
+              .replaceAll("[", "")
+              .split(",")[0]
+              .trim()
+              .toString();
+          streetValue = picker.adapter.text
+              .replaceAll("]", "")
+              .split(",")[1]
+              .trim()
+              .toString();
+
+          // prrint(cityValue + "" + streetValue);
+          print(cityController);
+          cityController.value = TextEditingValue(
+            text: cityValue,
+            selection: TextSelection.fromPosition(
+              TextPosition(offset: cityValue.length),
+            ),
+          );
+          streetController.value = TextEditingValue(
+            text: streetValue,
+            selection: TextSelection.fromPosition(
+              TextPosition(offset: streetValue.length),
+            ),
+          );
+        }).showModal(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Address Details",
+                  style: TextStyle(fontSize: 24),
+                ),
+              ],
+            ),
+            FormBuilderTextField(
+              attribute: "address_name",
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.next,
+              autofocus: true,
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.home),
+                  fillColor: Colors.pink,
+                  labelText: "Address Name",
+                  helperText: "Enter the address name here"),
+            ),
+            FormBuilderTextField(
+              enabled: false,
+              attribute: "floor_unitno",
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.business),
+                  fillColor: Colors.pink,
+                  labelText: "Floor/Unit Number",
+                  helperText: "Enter the floor or unit number here"),
+            ),
+            FormBuilderTextField(
+              attribute: "city_municipality",
+              keyboardType: TextInputType.text,
+              controller: cityController,
+              initialValue: cityValue,
+              onTap: () => showPickerModal(context, cityValue, streetValue,
+                  cityController, streetController),
+              focusNode: new AlwaysDisabledFocusNode(),
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                fillColor: Colors.pink,
+                labelText: "City/Municipality",
+              ),
+            ),
+            FormBuilderTextField(
+              onTap: () => showPickerModal(context, cityValue, streetValue,
+                  cityController, streetController),
+              controller: streetController,
+              focusNode: new AlwaysDisabledFocusNode(),
+              attribute: "barangay_street",
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                fillColor: Colors.pink,
+                labelText: "Barangay/Street",
+              ),
+            ),
+            FormBuilderTextField(
+              attribute: "additional_notes",
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  prefixIcon: Icon(Icons.border_color),
+                  fillColor: Colors.pink,
+                  labelText: "Additional Notes",
+                  helperText:
+                      "Put some additional notes regarding your address here."),
+            )
           ],
         ),
       ),
