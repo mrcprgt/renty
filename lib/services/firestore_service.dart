@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:renty_crud_version/debug/logger.dart';
 import 'package:renty_crud_version/models/item.dart';
 import 'package:renty_crud_version/models/user.dart';
 
@@ -23,6 +23,8 @@ class FirestoreService {
 
   final StreamController<List<Item>> _itemListingController =
       StreamController<List<Item>>.broadcast();
+
+  final log = getLogger("Firestore Service");
 
   //For realtime lazy load
   DocumentSnapshot _lastDocument;
@@ -49,17 +51,17 @@ class FirestoreService {
 
   //Get user
   Future getUser(String uid) async {
-    Logger logger = Logger();
-    logger.d("running getUserFunction");
+    log.d("running getUserFunction");
     try {
       var userData = await _usersCollectionReference.document(uid).get();
-      print(User.fromData(userData.data));
+      log.d("Document Snapshot: " + userData.data.toString());
+      log.d("User from Data Result: " + User.fromData(userData.data).fullName);
       return User.fromData(userData.data);
     } catch (e) {
       if (e is PlatformException) {
         return e.message;
       }
-      logger.e(e.toString());
+      log.e(e.toString());
     }
   }
 
@@ -71,23 +73,24 @@ class FirestoreService {
   //Streaming assets to grid view
   Stream listenToItemRealTime() {
     _requestItems();
-
     return _itemListingController.stream;
   }
 
   void _requestItems() {
+    log.d("Requesting more items");
     // #2: split the query from the actual subscription
     var pageItemsQuery = _itemListingsCollectionReference
         .orderBy('date_entered', descending: true)
         // #3: Limit the amount of results
         .limit(20);
 
-    // If there's no more posts then bail out of the function
-    if (!_hasMorePosts) return;
-
     if (_lastDocument != null) {
       pageItemsQuery = pageItemsQuery.startAfterDocument(_lastDocument);
     }
+
+    // If there's no more posts then bail out of the function
+    if (!_hasMorePosts) return;
+
     var currentRequestIndex = _allPagedResults.length;
 
     pageItemsQuery.snapshots().listen((postsSnapshot) {
@@ -156,7 +159,7 @@ class FirestoreService {
       // var toAdd = await uploadTask.onComplete
       //   ..ref.getDownloadURL();
       var toAdd = await (await uploadTask.onComplete).ref.getDownloadURL();
-      print(toAdd.toString());
+      log.d(toAdd.toString());
       imgUrls.add(toAdd.toString());
     }
 
@@ -234,11 +237,17 @@ class FirestoreService {
     String contactNumber,
     Map address,
   ) async {
-    await _usersCollectionReference.document(uid).updateData({
-      "phone": contactNumber,
-      "b_date": birthDate,
-      "address": address,
-    });
+    try {
+      await _usersCollectionReference.document(uid).updateData({
+        "phone": contactNumber,
+        "b_date": birthDate,
+        "address": address,
+      });
+    } catch (e) {
+      if (e is PlatformException) {
+        print(e.message);
+      }
+    }
   }
 
   //EOF
