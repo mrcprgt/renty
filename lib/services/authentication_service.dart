@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
+import 'package:renty_crud_version/debug/logger.dart';
 import 'package:renty_crud_version/models/user.dart';
 import 'package:renty_crud_version/locator.dart';
 import 'firestore_service.dart';
@@ -16,6 +18,9 @@ class AuthenticationService {
   );
   User _currentUser;
   User get currentUser => _currentUser;
+
+  //Debug
+  final log = getLogger('AuthService');
 
   Future loginWithEmail({
     @required String email,
@@ -63,9 +68,8 @@ class AuthenticationService {
   Future<void> loginWithGoogle() async {
     try {
       GoogleSignInAccount account = await _googleSignIn.signIn();
-      GoogleSignInAuthentication googleAuth = await account.authentication;
 
-      AuthResult res = await _firebaseAuth
+      var res = await _firebaseAuth
           .signInWithCredential(GoogleAuthProvider.getCredential(
         idToken: (await account.authentication).idToken,
         accessToken: (await account.authentication).accessToken,
@@ -78,14 +82,12 @@ class AuthenticationService {
           email: firebaseUser.email);
 
       await _firestoreService.createUser(_currentUser);
-      print(firebaseUser.uid);
+      log.d(firebaseUser.uid);
       await _populateCurrentUser(firebaseUser);
 
       return res != null;
     } catch (e) {
-      print(e.message);
-      print("Error logging with google");
-      return false;
+      log.d("Google sign in error: " + e.message);
     }
   }
 
@@ -96,8 +98,14 @@ class AuthenticationService {
   }
 
   Future _populateCurrentUser(FirebaseUser user) async {
-    if (user != null) {
-      _currentUser = await _firestoreService.getUser(user.uid);
+    try {
+      if (user != null) {
+        log.d(user.uid);
+        _currentUser = await _firestoreService.getUser(user.uid);
+        log.d("Current User value: " + _currentUser.toString());
+      }
+    } catch (e) {
+      log.d(e.toString());
     }
   }
 
