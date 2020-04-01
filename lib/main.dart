@@ -17,7 +17,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Logger.level = Level.warning;
+    Logger.level = Level.verbose;
     return MaterialApp(
       title: 'Renty',
       builder: (context, child) => Navigator(
