@@ -29,12 +29,12 @@ class VerificationViewModel extends BaseModel {
       "street_barangay": streetBarangay,
       "additional_notes": additionalNotes
     };
-    var uid = await _authenticationService.getUserDetails();
+    var uid = currentUser.id;
     await _firestoreService.updateAccountDetails(
         uid, gender, birthDate, contactNumber, address);
 
-    print("done");
+    print("Successfully sent account verification.");
     _navigationService.navigateTo(HomeTabViewRoute);
-    notifyListeners();
+    // notifyListeners();
   }
 }
