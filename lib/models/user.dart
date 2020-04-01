@@ -3,7 +3,7 @@ class User {
   final String fullName;
   final String email;
   final int contactNumber;
-  final String address;
+  final Map address;
   final DateTime birthDate;
   final DateTime accountCreated;
 
