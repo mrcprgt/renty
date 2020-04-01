@@ -16,7 +16,7 @@ class ItemTile extends StatelessWidget {
           splashColor: Colors.yellow,
           child: Material(
             clipBehavior: Clip.antiAlias,
-            elevation: 2.0,
+            elevation: 5.0,
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
