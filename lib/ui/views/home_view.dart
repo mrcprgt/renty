@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
+import 'package:renty_crud_version/ui/shared/ui_helpers.dart';
 import 'package:renty_crud_version/ui/widgets/creation_aware_list_item.dart';
 import 'package:renty_crud_version/ui/widgets/item_listing_tile.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:renty_crud_version/viewmodels/home_view_model.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({
-    Key key,
-  }) : super(key: key);
+// // Registering the viewmodel inside the get_it service locator
+GetIt locator = GetIt.instance;
 
+// setupServiceLocator() {
+//   // Singleton of the viewmodel
+//   locator.registerLaz<HomeViewModel>(() => HomeViewModel());
+// }
+
+class HomeView extends StatefulWidget {
   @override
   _HomeViewState createState() => _HomeViewState();
 }
@@ -22,8 +28,9 @@ class _HomeViewState extends State<HomeView>
   @override
   Widget build(BuildContext context) {
     return ViewModelProvider<HomeViewModel>.withConsumer(
-      viewModel: HomeViewModel(),
+      viewModel: locator<HomeViewModel>(),
       onModelReady: (model) => model.listenToItemListings(),
+      reuseExisting: true,
       builder: (context, model, child) {
         super.build(context);
         return SafeArea(
@@ -40,8 +47,17 @@ class _HomeViewState extends State<HomeView>
                     ),
                   )
                 : Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Colors.pink),
+                    child: Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Colors.pink),
+                          ),
+                          verticalSpaceMedium,
+                          Text("Getting things ready...")
+                        ],
+                      ),
                     ),
                   ),
             floatingActionButton: FloatingActionButton(
@@ -63,6 +79,9 @@ class _HomeViewState extends State<HomeView>
       pinned: false,
       floating: true,
       flexibleSpace: _buildSearchField(context, model),
+      actions: <Widget>[
+        GestureDetector(child: Icon(Icons.close), onTap: () => model.logout())
+      ],
     );
   }
 
@@ -115,8 +134,6 @@ class _HomeViewState extends State<HomeView>
                 ),
               ),
             )),
-
-        /// Set childCount to limit no.of items
         childCount: model.items.length,
       ),
     );
