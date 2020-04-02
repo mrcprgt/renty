@@ -8,6 +8,7 @@ import 'package:renty_crud_version/ui/views/item_details_view.dart';
 import 'package:renty_crud_version/ui/views/item_lend_view.dart';
 import 'package:renty_crud_version/ui/views/item_transaction_view.dart';
 import 'package:renty_crud_version/ui/views/login_view.dart';
+import 'package:renty_crud_version/ui/views/my_transactions_view.dart';
 import 'package:renty_crud_version/ui/views/verification_view.dart';
 import 'package:renty_crud_version/ui/widgets/onboarding.dart';
 
@@ -23,6 +24,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(
         routeName: settings.name,
         viewToShow: LoginView(),
+      );
+
+    case MyTransactionsViewRoute:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: MyTransactionsView(),
       );
 
     case AccountViewPageRoute:
