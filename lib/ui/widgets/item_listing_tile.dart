@@ -12,11 +12,11 @@ class ItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.all(8.0),
-        child: InkWell(
-          splashColor: Colors.yellow,
-          child: Material(
-            clipBehavior: Clip.antiAlias,
-            elevation: 5.0,
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          elevation: 5.0,
+          child: InkWell(
+            splashColor: Colors.white,
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
