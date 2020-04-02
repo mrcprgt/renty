@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:renty_crud_version/ui/views/accounts_view.dart';
 import 'package:renty_crud_version/ui/views/home_view.dart';
+import 'package:renty_crud_version/ui/views/my_transactions_view.dart';
 
 class HomeTabView extends StatefulWidget {
   @override
@@ -32,7 +33,7 @@ class _HomeTabViewState extends State<HomeTabView>
   List<Widget> pages = [
     HomeView(),
     AccountsView(),
-    AccountsView(),
+    MyTransactionsView(),
     AccountsView()
   ];
 
