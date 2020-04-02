@@ -10,4 +10,5 @@ const String MyProfilePageRoute = "MyProfilePage";
 const String MyItemsPageRoute = "MyItemsPage";
 const String AccountViewPageRoute = "AccountsView";
 const String VerificationViewRoute = "VerificationView";
+const String MyTransactionsViewRoute = "MyTransactionsView";
 // Generate the views here
