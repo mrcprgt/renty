@@ -18,6 +18,12 @@ class AccountsViewModel extends BaseModel {
         .whenComplete(() => {_navigationService.navigateTo(LoginViewRoute)});
   }
 
+  bool displayBanner() {
+    var isVerified = _authenticationService.currentUser.isVerifiedUser;
+
+    return isVerified;
+  }
+
   List getUserDetails() {
     var fullName = _authenticationService.currentUser.fullName;
     var emailAddress = _authenticationService.currentUser.email;
